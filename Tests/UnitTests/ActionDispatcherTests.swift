@@ -1,0 +1,157 @@
+import XCTest
+@testable import ExtensionCore
+@testable import Shared
+
+private final class MockCommandRunner: CommandRunning {
+    struct Invocation: Equatable {
+        let executable: String
+        let arguments: [String]
+    }
+
+    var invocations: [Invocation] = []
+    var nextStatus: Int32 = 0
+
+    @discardableResult
+    func run(executable: String, arguments: [String]) throws -> Int32 {
+        invocations.append(Invocation(executable: executable, arguments: arguments))
+        return nextStatus
+    }
+}
+
+private final class MockClipboardWriter: ClipboardWriting {
+    private(set) var copiedText: String?
+
+    func copy(text: String) throws {
+        copiedText = text
+    }
+}
+
+final class ActionDispatcherTests: XCTestCase {
+    func testCreateFileWithConflictNaming() throws {
+        let commandRunner = MockCommandRunner()
+        let clipboardWriter = MockClipboardWriter()
+        let dispatcher = ActionDispatcher(
+            commandRunner: commandRunner,
+            clipboardWriter: clipboardWriter
+        )
+
+        let temporaryDirectory = try TemporaryDirectory()
+        defer { temporaryDirectory.remove() }
+        let context = FinderSelectionContext(
+            selectedItemURLs: [],
+            currentDirectoryURL: temporaryDirectory.url
+        )
+
+        let fileItem = MenuDisplayItem(
+            id: "new_text",
+            title: "新建文本文件",
+            order: 0,
+            group: .create,
+            actionType: .createFile,
+            targetApplication: nil,
+            fileExtension: "txt",
+            defaultFileName: "Untitled.txt",
+            templateContent: ""
+        )
+
+        let firstFileURL = try dispatcher.execute(
+            item: fileItem,
+            context: context,
+            configuration: .default
+        )
+        let secondFileURL = try dispatcher.execute(
+            item: fileItem,
+            context: context,
+            configuration: .default
+        )
+
+        XCTAssertEqual(firstFileURL?.lastPathComponent, "Untitled.txt")
+        XCTAssertEqual(secondFileURL?.lastPathComponent, "Untitled 2.txt")
+        let content = try String(contentsOf: firstFileURL!, encoding: .utf8)
+        XCTAssertEqual(content, "")
+    }
+
+    func testCreateFolderWithConflictNaming() throws {
+        let dispatcher = ActionDispatcher(
+            commandRunner: MockCommandRunner(),
+            clipboardWriter: MockClipboardWriter()
+        )
+        let temporaryDirectory = try TemporaryDirectory()
+        defer { temporaryDirectory.remove() }
+
+        let context = FinderSelectionContext(
+            selectedItemURLs: [],
+            currentDirectoryURL: temporaryDirectory.url
+        )
+        let folderItem = MenuDisplayItem(
+            configuration: SharedConfiguration.default.menuItems.first { $0.id == "new_folder" }!
+        )
+
+        let firstFolder = try dispatcher.execute(item: folderItem, context: context, configuration: .default)
+        let secondFolder = try dispatcher.execute(item: folderItem, context: context, configuration: .default)
+
+        XCTAssertEqual(firstFolder?.lastPathComponent, "新建文件夹")
+        XCTAssertEqual(secondFolder?.lastPathComponent, "新建文件夹 2")
+    }
+
+    func testCopyPathCopiesSelectedFilePath() throws {
+        let clipboardWriter = MockClipboardWriter()
+        let dispatcher = ActionDispatcher(
+            commandRunner: MockCommandRunner(),
+            clipboardWriter: clipboardWriter
+        )
+
+        let temporaryDirectory = try TemporaryDirectory()
+        defer { temporaryDirectory.remove() }
+        let fileURL = temporaryDirectory.url.appendingPathComponent("README.md")
+        try "text".data(using: .utf8)?.write(to: fileURL)
+
+        let context = FinderSelectionContext(
+            selectedItemURLs: [fileURL],
+            currentDirectoryURL: temporaryDirectory.url
+        )
+        let item = MenuDisplayItem(
+            configuration: SharedConfiguration.default.menuItems.first { $0.id == "copy_path" }!
+        )
+
+        let resultURL = try dispatcher.execute(item: item, context: context, configuration: .default)
+
+        XCTAssertEqual(resultURL, fileURL)
+        XCTAssertEqual(clipboardWriter.copiedText, fileURL.path)
+    }
+
+    func testOpenTerminalUsesConfiguredPathWhenInstalled() throws {
+        let commandRunner = MockCommandRunner()
+        let dispatcher = ActionDispatcher(
+            commandRunner: commandRunner,
+            clipboardWriter: MockClipboardWriter()
+        )
+
+        let temporaryDirectory = try TemporaryDirectory()
+        defer { temporaryDirectory.remove() }
+        let selectedFolder = temporaryDirectory.url.appendingPathComponent("Selected")
+        try FileManager.default.createDirectory(at: selectedFolder, withIntermediateDirectories: true)
+
+        let mockTerminalPath = temporaryDirectory.url.appendingPathComponent("Terminal.app")
+        try FileManager.default.createDirectory(at: mockTerminalPath, withIntermediateDirectories: true)
+
+        var configuration = SharedConfiguration.default
+        configuration.applicationPaths[.terminal] = mockTerminalPath.path
+
+        let context = FinderSelectionContext(
+            selectedItemURLs: [selectedFolder],
+            currentDirectoryURL: temporaryDirectory.url
+        )
+        let item = MenuDisplayItem(
+            configuration: configuration.menuItems.first { $0.id == "open_terminal" }!
+        )
+
+        _ = try dispatcher.execute(item: item, context: context, configuration: configuration)
+
+        XCTAssertEqual(commandRunner.invocations.count, 1)
+        XCTAssertEqual(
+            commandRunner.invocations.first?.arguments,
+            ["-a", mockTerminalPath.path, selectedFolder.path]
+        )
+    }
+}

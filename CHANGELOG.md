@@ -11,6 +11,7 @@
 - 已生成 Release DMG：`SuperRight-4.0.29.dmg`，SHA256 为 `050ec664c936c3144c7a14470c7f6713f82de037ea03db0c139ed25b914e9e5f`。
 - 已生成 Sparkle `appcast.xml`，包含 `sparkle:version=2026060953`、`sparkle:shortVersionString=4.0.29` 和 EdDSA 签名。
 - GitHub Release 发布由 `superRight` 仓库工作流上传 `发布/V4.0.29/SuperRight-4.0.29.dmg` 与 `发布/V4.0.29/appcast.xml`。
+- 已验证 GitHub Release：`https://github.com/maple1314who/superRight/releases/latest/download/appcast.xml` 和 `https://github.com/maple1314who/superRight/releases/latest/download/SuperRight-4.0.29.dmg` 均返回 `200`。
 - 当前包仍使用 Apple Development 证书签名，外部分发前仍需要 Developer ID 签名与 notarization。
 
 ### 验证

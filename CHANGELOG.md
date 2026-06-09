@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## V4.0.28 - 2026-06-09
+
+### 重构
+- `AppExecutionSharingAdapter` 接管 AirDrop 分享动作的 Finder 选中项解析、URL 去重、分享服务查找和主线程系统面板调用。
+- `AppExecutionRequestHandler` 的 AirDrop 动作改为只保留策略入口并委托分享适配器。
+- 主 App 与 Finder Extension 版本升级为 `4.0.28 / 2026060952`。
+
+### 验证
+- `swift test`：55 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+- 已安装 `/Applications/右键增强.app`，主 App 和 Finder Extension 均为 `4.0.28 / 2026060952`，插件注册为 `com.maple.right.superright.RightClickFinderExtension(4.0.28)`；最近 5 分钟未发现新崩溃报告。
+
 ## V4.0.27 - 2026-06-09
 
 ### 重构

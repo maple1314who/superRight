@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## V3.10.5 - 2026-06-09
+
+### 修复
+- 修复主窗口背景拖拽覆盖层调用 `contentView.hitTest` 导致 SwiftUI 命中测试递归、打开后闪退的问题。
+- 侧边栏、表格下方按钮区、开关区和通用设置页补充拖拽排除标记，保证控件点击不被背景拖窗覆盖层截获。
+- 主 App 与 Finder Extension 版本升级为 `3.10.5 / 2026060923`。
+
+### 验证
+- `swift test`：51 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+
 ## V3.10.4 - 2026-06-09
 
 ### 修复

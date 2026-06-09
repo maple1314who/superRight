@@ -201,6 +201,7 @@ private struct SidebarView: View {
                 endPoint: .bottom
             )
         )
+        .background(WindowDragExclusionMarker())
     }
 }
 
@@ -278,6 +279,7 @@ private struct NewFileSettingsView: View {
                 }
             }
             .padding(.horizontal, 20)
+            .background(WindowDragExclusionMarker())
 
             if let importErrorMessage {
                 Text(importErrorMessage)
@@ -319,6 +321,7 @@ private struct NewFileSettingsView: View {
             .font(.system(size: 13))
             .padding(.horizontal, 58)
             .padding(.top, 10)
+            .background(WindowDragExclusionMarker())
 
             Spacer()
         }
@@ -386,6 +389,7 @@ private struct SendToSettingsView: View {
                 }
             }
             .padding(.horizontal, 20)
+            .background(WindowDragExclusionMarker())
 
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 14) {
@@ -419,6 +423,7 @@ private struct SendToSettingsView: View {
             .font(.system(size: 13))
             .padding(.horizontal, 58)
             .padding(.top, 10)
+            .background(WindowDragExclusionMarker())
 
             Spacer()
         }
@@ -579,6 +584,7 @@ private struct FavoriteDirectoriesView: View {
                 }
             }
             .padding(.horizontal, 20)
+            .background(WindowDragExclusionMarker())
 
             HStack {
                 Toggle(
@@ -603,6 +609,7 @@ private struct FavoriteDirectoriesView: View {
             .font(.system(size: 13))
             .padding(.horizontal, 58)
             .padding(.top, 10)
+            .background(WindowDragExclusionMarker())
 
             Spacer()
         }
@@ -750,6 +757,7 @@ private struct FileIconSettingsView: View {
                 }
             }
             .padding(.horizontal, 20)
+            .background(WindowDragExclusionMarker())
 
             HStack {
                 Toggle(
@@ -774,6 +782,7 @@ private struct FileIconSettingsView: View {
             .font(.system(size: 13))
             .padding(.horizontal, 58)
             .padding(.top, 10)
+            .background(WindowDragExclusionMarker())
 
             Spacer()
         }
@@ -837,6 +846,7 @@ private struct ToolboxSettingsView: View {
                 }
             }
             .padding(.horizontal, 20)
+            .background(WindowDragExclusionMarker())
 
             HStack {
                 Toggle(
@@ -861,6 +871,7 @@ private struct ToolboxSettingsView: View {
             .font(.system(size: 13))
             .padding(.horizontal, 58)
             .padding(.top, 10)
+            .background(WindowDragExclusionMarker())
 
             Spacer()
         }
@@ -933,6 +944,7 @@ private struct GeneralSettingsView: View {
         .padding(.top, 92)
         .padding(.horizontal, 58)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .background(WindowDragExclusionMarker())
         .onAppear {
             refreshFullDiskAccessStatus()
         }

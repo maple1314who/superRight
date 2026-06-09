@@ -10,6 +10,7 @@
 ### 验证
 - `swift test`：47 tests, 0 failures。
 - `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：`BUILD SUCCEEDED`。
+- 本机运行态复核：Finder Extension 已切回 `/Applications/右键增强.app` 单一注册源，历史 DMG 无挂载残留，监听目录为 `/Users/maple`。
 
 ## V3.9.4 - 2026-06-09
 

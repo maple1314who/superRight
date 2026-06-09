@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## V4.0.15 - 2026-06-09
+
+### 重构
+- 新增主 App `AppExecutionVisibilityAdapter`，集中处理选中项和当前目录直接子项的 Finder 隐藏标记业务编排。
+- `AppExecutionRequestHandler` 的隐藏/取消隐藏动作改为只负责策略入口并委托适配器执行。
+- 主 App 与 Finder Extension 版本升级为 `4.0.15 / 2026060939`。
+
+### 验证
+- `swift test`：55 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+- 已安装 `/Applications/右键增强.app`，主 App 和 Finder Extension 均为 `4.0.15 / 2026060939`，插件注册为 `com.maple.right.superright.RightClickFinderExtension(4.0.15)`。
+- 最近 5 分钟未发现 `右键增强` 或 `RightClickFinderExtension` 新崩溃报告。
+
 ## V4.0.14 - 2026-06-09
 
 ### 重构

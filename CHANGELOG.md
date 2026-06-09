@@ -1,5 +1,22 @@
 # CHANGELOG
 
+## V3.9.0 - 2026-06-09
+
+### 新增
+- 主 App 集成 Sparkle `2.9.3`，支持自动检查更新和菜单栏手动“检查更新…”。
+- 新增 Sparkle Appcast 配置，更新源指向 GitHub Release 的 `appcast.xml`。
+- 主 App entitlements 增加网络访问和 Sparkle sandbox XPC mach lookup 例外。
+
+### 改进
+- 发版流程增加 Sparkle EdDSA 公钥、ZIP 包和 Appcast 生成记录。
+- 主 App 与 Finder Extension 版本升级为 `3.9.0 / 2026060909`。
+
+### 验证
+- `swift test`：42 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：`BUILD SUCCEEDED`。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Release -destination platform=macOS -derivedDataPath build/DerivedData build`：`BUILD SUCCEEDED`。
+- Sparkle Appcast 已生成并包含 `sparkle:edSignature`。
+
 ## V3.8.0 - 2026-06-09
 
 ### 新增

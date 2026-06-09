@@ -66,7 +66,7 @@ private enum AppVersionInfo {
     static let displayName = "右键增强"
 
     static var version: String {
-        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "3.8.0"
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "3.9.0"
     }
 
     static var sidebarTitle: String {

@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## V3.9.9 - 2026-06-09
+
+### 修复
+- “发送文件到...”和“常用目录”短列表表格按实际行数收缩，避免大块空白区域。
+- “常用目录”行改为只读点击选择，并支持稳定拖拽排序。
+- 工具箱选项列过滤空选项，无真实选项的功能不再显示空 Picker。
+
+### 改进
+- 常用目录排序由 `MenuManagementViewModel` 统一重排并重新编号。
+- 主 App 与 Finder Extension 版本升级为 `3.9.9 / 2026060917`。
+
+### 验证
+- `swift test`：51 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+
 ## V3.9.8 - 2026-06-09
 
 ### 修复

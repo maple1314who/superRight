@@ -348,7 +348,6 @@ private struct SendToSettingsView: View {
             SendToDestinationTableView(
                 viewModel: viewModel,
                 showIcons: viewModel.configuration.appSettings.showSendToIcons,
-                emptyRowCount: 12,
                 selectedDestinationID: $selectedDestinationID,
                 moveDestination: viewModel.moveSendToDestination
             )
@@ -441,14 +440,13 @@ private struct SendToSettingsView: View {
 private struct SendToDestinationTableView: View {
     @ObservedObject var viewModel: MenuManagementViewModel
     let showIcons: Bool
-    let emptyRowCount: Int
     @Binding var selectedDestinationID: String?
     let moveDestination: (String, String) -> Void
     @State private var draggingDestinationID: String?
     @State private var pendingDropTargetID: String?
 
     var body: some View {
-        SettingsTableFrame {
+        SettingsTableFrame(height: compactTableHeight(rowCount: viewModel.sortedSendToDestinations.count)) {
             HStack(spacing: 0) {
                 HeaderCell("图标", width: 60)
                 HeaderCell("真实路径", alignment: .leading)
@@ -481,7 +479,7 @@ private struct SendToDestinationTableView: View {
                 )
             }
 
-            EmptyStripedRows(startIndex: viewModel.sortedSendToDestinations.count, count: emptyRowCount)
+            EmptyStripedRows(startIndex: viewModel.sortedSendToDestinations.count, count: compactEmptyRowCount)
         }
     }
 }
@@ -536,24 +534,26 @@ private struct SendToDestinationRowView: View {
 
 private struct FavoriteDirectoriesView: View {
     @ObservedObject var viewModel: MenuManagementViewModel
+    @State private var selectedDirectoryID: String?
 
     var body: some View {
         VStack(spacing: 12) {
             FavoriteDirectoryTableView(
                 viewModel: viewModel,
                 showIcons: viewModel.configuration.appSettings.showFavoriteDirectoryIcons,
-                emptyRowCount: 16
+                selectedDirectoryID: $selectedDirectoryID,
+                moveDirectory: viewModel.moveFavoriteDirectory
             )
             .padding(.horizontal, 20)
             .padding(.top, 45)
 
             HStack(spacing: 8) {
                 SmallSquareButton(systemImage: "plus") {
-                    viewModel.addFavoriteDirectory()
+                    selectedDirectoryID = viewModel.addFavoriteDirectory()
                 }
 
                 SmallSquareButton(systemImage: "minus") {
-                    viewModel.removeLastFavoriteDirectory()
+                    removeSelectedFavoriteDirectory()
                 }
                 .disabled(viewModel.sortedFavoriteDirectories.isEmpty)
 
@@ -592,19 +592,32 @@ private struct FavoriteDirectoriesView: View {
             Spacer()
         }
     }
+
+    private func removeSelectedFavoriteDirectory() {
+        if let selectedDirectoryID,
+           viewModel.sortedFavoriteDirectories.contains(where: { $0.id == selectedDirectoryID }) {
+            viewModel.removeFavoriteDirectory(id: selectedDirectoryID)
+        } else {
+            viewModel.removeLastFavoriteDirectory()
+        }
+        selectedDirectoryID = viewModel.sortedFavoriteDirectories.last?.id
+    }
 }
 
 private struct FavoriteDirectoryTableView: View {
     @ObservedObject var viewModel: MenuManagementViewModel
     let showIcons: Bool
-    let emptyRowCount: Int
+    @Binding var selectedDirectoryID: String?
+    let moveDirectory: (String, String) -> Void
+    @State private var draggingDirectoryID: String?
+    @State private var pendingDropTargetID: String?
 
     var body: some View {
-        SettingsTableFrame {
+        SettingsTableFrame(height: compactTableHeight(rowCount: viewModel.sortedFavoriteDirectories.count)) {
             HStack(spacing: 0) {
                 HeaderCell("图标", width: 60)
                 HeaderCell("真实路径", alignment: .leading)
-                HeaderCell("显示名称（点击编辑/按住拖拽）", alignment: .leading)
+                HeaderCell("显示名称（点击选择/按住拖拽）", alignment: .leading)
             }
         } rows: {
             ForEach(viewModel.sortedFavoriteDirectories.indices, id: \.self) { index in
@@ -613,11 +626,27 @@ private struct FavoriteDirectoryTableView: View {
                     directory: directory,
                     showIcon: showIcons,
                     isOdd: index % 2 == 1,
-                    update: viewModel.updateFavoriteDirectory
+                    isSelected: selectedDirectoryID == directory.id,
+                    select: { selectedDirectoryID = directory.id }
+                )
+                .opacity(draggingDirectoryID == directory.id ? 0.55 : 1)
+                .onDrag {
+                    draggingDirectoryID = directory.id
+                    pendingDropTargetID = nil
+                    return NSItemProvider(object: directory.id as NSString)
+                }
+                .onDrop(
+                    of: [UTType.text],
+                    delegate: StableReorderDropDelegate(
+                        targetID: directory.id,
+                        draggingID: $draggingDirectoryID,
+                        pendingTargetID: $pendingDropTargetID,
+                        move: moveDirectory
+                    )
                 )
             }
 
-            EmptyStripedRows(startIndex: viewModel.sortedFavoriteDirectories.count, count: emptyRowCount)
+            EmptyStripedRows(startIndex: viewModel.sortedFavoriteDirectories.count, count: compactEmptyRowCount)
         }
     }
 }
@@ -626,7 +655,8 @@ private struct FavoriteDirectoryRowView: View {
     let directory: FileDestinationConfiguration
     let showIcon: Bool
     let isOdd: Bool
-    let update: (FileDestinationConfiguration) -> Void
+    let isSelected: Bool
+    let select: () -> Void
 
     var body: some View {
         HStack(spacing: 0) {
@@ -640,38 +670,31 @@ private struct FavoriteDirectoryRowView: View {
             }
             .frame(width: 60)
 
-            TextField(
-                "",
-                text: Binding(
-                    get: { directory.directoryPath },
-                    set: { update(\.directoryPath, value: $0) }
-                )
-            )
-            .textFieldStyle(.plain)
-            .font(.system(size: 13))
-            .padding(.horizontal, 8)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            Text(directory.directoryPath)
+                .lineLimit(1)
+                .truncationMode(.middle)
+                .font(.system(size: 13))
+                .padding(.horizontal, 8)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-            TextField(
-                "",
-                text: Binding(
-                    get: { directory.title },
-                    set: { update(\.title, value: $0) }
-                )
-            )
-            .textFieldStyle(.plain)
-            .font(.system(size: 13))
-            .padding(.horizontal, 8)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            Text(directory.title)
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .font(.system(size: 13))
+                .padding(.horizontal, 8)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
         .frame(height: 32)
-        .background(isOdd ? Color.black.opacity(0.035) : Color.white)
+        .contentShape(Rectangle())
+        .background(rowBackground)
+        .onTapGesture(perform: select)
     }
 
-    private func update<Value>(_ keyPath: WritableKeyPath<FileDestinationConfiguration, Value>, value: Value) {
-        var updated = directory
-        updated[keyPath: keyPath] = value
-        update(updated)
+    private var rowBackground: Color {
+        if isSelected {
+            return Color.accentColor.opacity(0.18)
+        }
+        return isOdd ? Color.black.opacity(0.035) : Color.white
     }
 }
 
@@ -1243,18 +1266,30 @@ private struct ToolboxRowView: View {
                 .padding(.horizontal, 8)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            Picker(
-                "",
-                selection: Binding(
-                    get: { item.option },
-                    set: { update(\.option, value: $0) }
-                )
-            ) {
-                ForEach(item.availableOptions, id: \.self) { option in
-                    Text(option).tag(option)
+            Group {
+                if item.selectableOptions.isEmpty {
+                    Color.clear
+                } else if item.selectableOptions.count == 1,
+                          let option = item.selectableOptions.first {
+                    Text(option)
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                } else {
+                    Picker(
+                        "",
+                        selection: Binding(
+                            get: { item.option },
+                            set: { update(\.option, value: $0) }
+                        )
+                    ) {
+                        ForEach(item.selectableOptions, id: \.self) { option in
+                            Text(option).tag(option)
+                        }
+                    }
+                    .labelsHidden()
                 }
             }
-            .labelsHidden()
             .frame(width: 238)
             .padding(.trailing, 22)
         }
@@ -1270,13 +1305,16 @@ private struct ToolboxRowView: View {
 }
 
 private struct SettingsTableFrame<Header: View, Rows: View>: View {
+    let height: CGFloat
     let header: Header
     let rows: Rows
 
     init(
+        height: CGFloat = 455,
         @ViewBuilder header: () -> Header,
         @ViewBuilder rows: () -> Rows
     ) {
+        self.height = height
         self.header = header()
         self.rows = rows()
     }
@@ -1296,7 +1334,7 @@ private struct SettingsTableFrame<Header: View, Rows: View>: View {
                 }
             }
         }
-        .frame(height: 455)
+        .frame(height: height)
         .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 2))
         .overlay(
@@ -1304,6 +1342,13 @@ private struct SettingsTableFrame<Header: View, Rows: View>: View {
                 .stroke(Color.black.opacity(0.12), lineWidth: 1)
         )
     }
+}
+
+private let compactEmptyRowCount = 0
+
+private func compactTableHeight(rowCount: Int) -> CGFloat {
+    let visibleRows = max(rowCount + compactEmptyRowCount, 1)
+    return min(455, 29 + CGFloat(visibleRows * 32))
 }
 
 private struct EmptyStripedRows: View {
@@ -1648,6 +1693,10 @@ private extension FileIconConfiguration {
 }
 
 private extension ToolboxItemConfiguration {
+    var selectableOptions: [String] {
+        availableOptions.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+    }
+
     var iconTint: Color {
         switch iconColorName {
         case "blue":

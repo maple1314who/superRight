@@ -75,6 +75,20 @@ final class MenuManagementViewModelTests: XCTestCase {
         XCTAssertEqual(Set(sorted.map(\.order)), Set(0..<sorted.count))
     }
 
+    func testFavoriteDirectoryReorderPersists() throws {
+        let store = InMemoryConfigurationStore(configuration: .default)
+        let viewModel = MenuManagementViewModel(store: store)
+        let firstID = viewModel.sortedFavoriteDirectories[0].id
+        let thirdID = viewModel.sortedFavoriteDirectories[2].id
+
+        viewModel.moveFavoriteDirectory(draggedID: firstID, targetID: thirdID)
+
+        let sorted = viewModel.sortedFavoriteDirectories
+
+        XCTAssertEqual(sorted[2].id, firstID)
+        XCTAssertEqual(Set(sorted.map(\.order)), Set(0..<sorted.count))
+    }
+
     func testFileIconImageImportAndReorderPersists() throws {
         let store = InMemoryConfigurationStore(configuration: .default)
         let viewModel = MenuManagementViewModel(store: store)

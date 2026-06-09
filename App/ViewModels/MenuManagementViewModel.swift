@@ -372,10 +372,12 @@ public final class MenuManagementViewModel: ObservableObject {
         persistIfPossible()
     }
 
-    public func addFavoriteDirectory() {
+    @discardableResult
+    public func addFavoriteDirectory() -> String {
         let nextIndex = (configuration.favoriteDirectories.map(\.order).max() ?? -1) + 1
+        let id = "custom_\(UUID().uuidString)"
         let directory = FileDestinationConfiguration(
-            id: "custom_\(UUID().uuidString)",
+            id: id,
             title: "新目录",
             directoryPath: NSHomeDirectory(),
             order: nextIndex,
@@ -385,6 +387,7 @@ public final class MenuManagementViewModel: ObservableObject {
         configuration.favoriteDirectories.append(directory)
         configuration.normalizeOrder()
         persistIfPossible()
+        return id
     }
 
     public func removeLastFavoriteDirectory() {
@@ -397,6 +400,39 @@ public final class MenuManagementViewModel: ObservableObject {
             configuration.favoriteDirectories = FileDestinationConfiguration.defaultFavoriteDirectories
         }
         configuration.normalizeOrder()
+        persistIfPossible()
+    }
+
+    public func removeFavoriteDirectory(id: String) {
+        configuration.favoriteDirectories.removeAll { $0.id == id }
+        if configuration.favoriteDirectories.isEmpty {
+            configuration.favoriteDirectories = FileDestinationConfiguration.defaultFavoriteDirectories
+        }
+        configuration.normalizeOrder()
+        persistIfPossible()
+    }
+
+    /// 调整常用目录顺序。
+    ///
+    /// 常用目录界面和“发送文件到”保持一致：行内容只读，拖拽只传递 ID；
+    /// 排序统一在 ViewModel 中重新编号并持久化，避免 UI 与 Finder 菜单顺序不一致。
+    public func moveFavoriteDirectory(draggedID: String, targetID: String) {
+        guard draggedID != targetID else {
+            return
+        }
+
+        var orderedDirectories = configuration.sortedFavoriteDirectories()
+        guard let sourceIndex = orderedDirectories.firstIndex(where: { $0.id == draggedID }),
+              let targetIndex = orderedDirectories.firstIndex(where: { $0.id == targetID }) else {
+            return
+        }
+
+        let movingDirectory = orderedDirectories.remove(at: sourceIndex)
+        orderedDirectories.insert(movingDirectory, at: targetIndex)
+        for index in orderedDirectories.indices {
+            orderedDirectories[index].order = index
+        }
+        configuration.favoriteDirectories = orderedDirectories
         persistIfPossible()
     }
 

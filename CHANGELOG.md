@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## V4.0.2 - 2026-06-09
+
+### 重构
+- 主 App `AppExecutionRequestHandler` 接入 V4 执行架构，执行入口改为策略工厂 + 策略调用。
+- 新增主 App 侧 `AppExecutionStrategyContext`，用上下文适配既有 AppKit、文件系统和工具箱实现。
+- 新增主 App 侧责任链 `AppExecutionPreflightLink`，在执行前校验外部应用目标、目标目录、复制/移动源文件。
+- 新增主 App 侧观察者 `AppExecutionObserving`，统一记录动作开始、成功和失败。
+- 主 App 与 Finder Extension 版本升级为 `4.0.2 / 2026060926`。
+
+### 验证
+- `swift test`：55 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+
 ## V4.0.1 - 2026-06-09
 
 ### 重构

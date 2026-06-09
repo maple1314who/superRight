@@ -75,6 +75,14 @@ private enum AppVersionInfo {
     }
 }
 
+private enum RootConfigurationLayout {
+    /// 内容区顶部统一留白。
+    ///
+    /// 主窗口使用 full-size content view，系统红黄绿按钮浮在内容上方；
+    /// 表格页统一下移，保持和旧版“超级右键”一致的顶部呼吸区。
+    static let contentTopPadding: CGFloat = 90
+}
+
 private enum SidebarSection: String, Identifiable {
     case newFile = "新建文件"
     case sendTo = "发送文件到..."
@@ -231,7 +239,7 @@ private struct NewFileSettingsView: View {
                 moveTemplate: viewModel.moveNewFileTemplate
             )
                 .padding(.horizontal, 20)
-                .padding(.top, 45)
+                .padding(.top, RootConfigurationLayout.contentTopPadding)
 
             HStack(spacing: 8) {
                 Button("添加模板文件") {
@@ -352,7 +360,7 @@ private struct SendToSettingsView: View {
                 moveDestination: viewModel.moveSendToDestination
             )
             .padding(.horizontal, 20)
-            .padding(.top, 45)
+            .padding(.top, RootConfigurationLayout.contentTopPadding)
 
             HStack(spacing: 8) {
                 SmallSquareButton(systemImage: "plus") {
@@ -545,7 +553,7 @@ private struct FavoriteDirectoriesView: View {
                 moveDirectory: viewModel.moveFavoriteDirectory
             )
             .padding(.horizontal, 20)
-            .padding(.top, 45)
+            .padding(.top, RootConfigurationLayout.contentTopPadding)
 
             HStack(spacing: 8) {
                 SmallSquareButton(systemImage: "plus") {
@@ -712,7 +720,7 @@ private struct FileIconSettingsView: View {
                 clearImage: clearIconImage
             )
                 .padding(.horizontal, 20)
-                .padding(.top, 45)
+                .padding(.top, RootConfigurationLayout.contentTopPadding)
 
             HStack(spacing: 8) {
                 SmallSquareButton(systemImage: "plus") {
@@ -810,7 +818,7 @@ private struct ToolboxSettingsView: View {
                 update: viewModel.updateToolboxItem
             )
                 .padding(.horizontal, 20)
-                .padding(.top, 45)
+                .padding(.top, RootConfigurationLayout.contentTopPadding)
 
             HStack(spacing: 8) {
                 Button("申请其他功能") {}

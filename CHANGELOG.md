@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## V3.10.0 - 2026-06-09
+
+### 调整
+- 配置页表格顶部统一留出 `90pt` 空间，视觉结构对齐旧版“超级右键”。
+- 新增 `RootConfigurationLayout` 集中管理根配置界面布局常量。
+- 主 App 与 Finder Extension 版本升级为 `3.10.0 / 2026060918`。
+
+### 验证
+- `swift test`：51 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+
 ## V3.9.9 - 2026-06-09
 
 ### 修复

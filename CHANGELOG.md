@@ -19,6 +19,7 @@
 - `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
 - `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Release -destination platform=macOS -derivedDataPath build/PackageRelease build`：BUILD SUCCEEDED。
 - 本机安装 `/Applications/右键增强.app` 后，`pluginkit` 仅注册 `com.maple.right.superright.RightClickFinderExtension(4.0.32)`；Finder Extension 日志显示 `directoryURLs applied ... paths=/Users/maple`。
+- 已验证 GitHub Release：`appcast.xml` 指向 `4.0.32 / 2026060956`，`SuperRight-4.0.32.dmg` 可下载，远端 DMG SHA256 为 `8ef01b30307bc0a5a24d5fd4e0b6efba822c19f6a9e947731fe6b9727fbb7bfa`。
 
 ## V4.0.31 - 2026-06-09
 

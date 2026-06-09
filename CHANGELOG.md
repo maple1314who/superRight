@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## V4.0.1 - 2026-06-09
+
+### 重构
+- 新增责任链模式 `ActionExecutionPreflightLink`，在进入策略前统一校验动作前置条件。
+- 新增默认文件名、目标目录、Finder 选中项三个前置校验节点，避免具体策略重复校验。
+- 明确 `ForwardedOnlyActionStrategy` 作为空对象策略处理只应转发给主 App 的动作。
+- 主 App 与 Finder Extension 版本升级为 `4.0.1 / 2026060925`。
+
+### 验证
+- `swift test`：55 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+
 ## V4.0.0 - 2026-06-09
 
 ### 重构

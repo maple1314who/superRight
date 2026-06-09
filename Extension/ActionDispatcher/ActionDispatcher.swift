@@ -21,10 +21,12 @@ public enum ActionDispatchError: Error, Equatable {
 /// - 工厂：`MenuActionStrategyFactory` 根据 `MenuActionType` 选择策略。
 /// - 适配器：`ActionExecutionAdapters` 隔离文件系统、外部 App、系统版本差异。
 /// - 观察者：`ActionExecutionObserving` 记录开始、成功和失败事件。
+/// - 责任链：`ActionExecutionPreflightLink` 在进入策略前统一校验前置条件。
 public final class ActionDispatcher {
     private let strategyFactory: MenuActionStrategyFactory
     private let adapters: ActionExecutionAdapters
     private let observer: ActionExecutionObserving
+    private let preflightChain: ActionExecutionPreflightLink
 
     public init(
         fileManager: FileManager = .default,
@@ -32,6 +34,7 @@ public final class ActionDispatcher {
         clipboardWriter: ClipboardWriting = NSPasteboardWriter(),
         systemVersionProvider: SystemVersionProviding = ProcessInfoSystemVersionProvider(),
         strategyFactory: MenuActionStrategyFactory = MenuActionStrategyFactory(),
+        preflightChain: ActionExecutionPreflightLink = ActionExecutionPreflightLink.defaultChain(),
         observers: [ActionExecutionObserving] = [NSLogActionExecutionObserver()]
     ) {
         self.strategyFactory = strategyFactory
@@ -48,6 +51,7 @@ public final class ActionDispatcher {
             clipboardWriter: clipboardWriter
         )
         self.observer = CompositeActionExecutionObserver(observers)
+        self.preflightChain = preflightChain
     }
 
     /// 执行一个菜单动作，并返回被创建、打开或处理的目标 URL。
@@ -65,6 +69,7 @@ public final class ActionDispatcher {
         observer.actionWillExecute(request)
 
         do {
+            try preflightChain.validate(request)
             let strategy = strategyFactory.makeStrategy(for: item.actionType)
             let resultURL = try strategy.execute(
                 request: request,

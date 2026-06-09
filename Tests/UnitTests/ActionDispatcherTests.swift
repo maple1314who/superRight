@@ -45,6 +45,73 @@ private final class SpyActionExecutionObserver: ActionExecutionObserving {
 }
 
 final class ActionDispatcherTests: XCTestCase {
+    func testV4PreflightChainPrioritizesDestinationPathBeforeSelection() throws {
+        let dispatcher = ActionDispatcher(
+            commandRunner: MockCommandRunner(),
+            clipboardWriter: MockClipboardWriter(),
+            observers: []
+        )
+        let temporaryDirectory = try TemporaryDirectory()
+        defer { temporaryDirectory.remove() }
+        let context = FinderSelectionContext(
+            selectedItemURLs: [],
+            currentDirectoryURL: temporaryDirectory.url
+        )
+        let item = MenuDisplayItem(
+            id: "copy_to_missing_destination",
+            title: "复制到缺失目标",
+            order: 0,
+            group: .tool,
+            actionType: .copyToDirectory,
+            targetApplication: nil,
+            fileExtension: nil,
+            defaultFileName: nil,
+            templateContent: nil,
+            destinationPath: nil
+        )
+
+        XCTAssertThrowsError(
+            try dispatcher.execute(item: item, context: context, configuration: .default)
+        ) { error in
+            XCTAssertEqual(error as? ActionDispatchError, .missingDestinationPath)
+        }
+    }
+
+    func testV4PreflightFailureNotifiesObserver() throws {
+        let observer = SpyActionExecutionObserver()
+        let dispatcher = ActionDispatcher(
+            commandRunner: MockCommandRunner(),
+            clipboardWriter: MockClipboardWriter(),
+            observers: [observer]
+        )
+        let temporaryDirectory = try TemporaryDirectory()
+        defer { temporaryDirectory.remove() }
+        let context = FinderSelectionContext(
+            selectedItemURLs: [],
+            currentDirectoryURL: temporaryDirectory.url
+        )
+        let item = MenuDisplayItem(
+            id: "new_invalid_file",
+            title: "新建无效文件",
+            order: 0,
+            group: .create,
+            actionType: .createFile,
+            targetApplication: nil,
+            fileExtension: nil,
+            defaultFileName: nil,
+            templateContent: nil
+        )
+
+        XCTAssertThrowsError(
+            try dispatcher.execute(item: item, context: context, configuration: .default)
+        ) { error in
+            XCTAssertEqual(error as? ActionDispatchError, .missingFileNameConfiguration)
+        }
+        XCTAssertEqual(observer.willExecuteActionTypes, [.createFile])
+        XCTAssertEqual(observer.finishedActionTypes, [])
+        XCTAssertEqual(observer.failedActionTypes, [.createFile])
+    }
+
     func testV4FactoryProvidesForwardedOnlyStrategyForAppOnlyActions() throws {
         let strategy = MenuActionStrategyFactory().makeStrategy(for: .applyFileIcon)
         let temporaryDirectory = try TemporaryDirectory()

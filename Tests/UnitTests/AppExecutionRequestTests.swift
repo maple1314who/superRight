@@ -8,6 +8,13 @@ final class AppExecutionRequestTests: XCTestCase {
         XCTAssertNil(AppExecutionAction.openDirectory.externalApplication)
         XCTAssertNil(AppExecutionAction.applyFileIcon.externalApplication)
         XCTAssertNil(AppExecutionAction.removeCustomIcon.externalApplication)
+        XCTAssertNil(AppExecutionAction.showFileInfo.externalApplication)
+        XCTAssertNil(AppExecutionAction.copyFileName.externalApplication)
+        XCTAssertNil(AppExecutionAction.createFolderFromFileName.externalApplication)
+        XCTAssertNil(AppExecutionAction.hideSelectedItems.externalApplication)
+        XCTAssertNil(AppExecutionAction.unhideSelectedItems.externalApplication)
+        XCTAssertNil(AppExecutionAction.hideDirectoryItems.externalApplication)
+        XCTAssertNil(AppExecutionAction.unhideDirectoryItems.externalApplication)
         XCTAssertEqual(AppExecutionAction.openTerminal.externalApplication, .terminal)
         XCTAssertEqual(AppExecutionAction.openITerm.externalApplication, .iTerm)
         XCTAssertEqual(AppExecutionAction.openVSCode.externalApplication, .vsCode)
@@ -75,5 +82,24 @@ final class AppExecutionRequestTests: XCTestCase {
         XCTAssertEqual(decoded.sourcePaths, ["/Users/maple/Desktop/a.txt"])
         XCTAssertEqual(decoded.iconSystemImageName, "doc.fill")
         XCTAssertEqual(decoded.iconColorName, "blue")
+    }
+
+    func testRequestRoundTripPreservesToolboxFields() throws {
+        let request = AppExecutionRequest(
+            requestID: "request-4",
+            action: .copyFileName,
+            directoryPath: "/Users/maple/Desktop",
+            targetPath: "/Users/maple/Desktop/a.txt",
+            sourcePaths: ["/Users/maple/Desktop/a.txt"],
+            toolboxOption: "option"
+        )
+
+        let encoded = try JSONEncoder().encode(request)
+        let decoded = try JSONDecoder().decode(AppExecutionRequest.self, from: encoded)
+
+        XCTAssertEqual(decoded.requestID, "request-4")
+        XCTAssertEqual(decoded.action, .copyFileName)
+        XCTAssertEqual(decoded.sourcePaths, ["/Users/maple/Desktop/a.txt"])
+        XCTAssertEqual(decoded.toolboxOption, "option")
     }
 }

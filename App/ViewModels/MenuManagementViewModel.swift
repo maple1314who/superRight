@@ -41,6 +41,10 @@ public final class MenuManagementViewModel: ObservableObject {
         configuration.sortedFileIconPresets()
     }
 
+    public var sortedToolboxItems: [ToolboxItemConfiguration] {
+        configuration.sortedToolboxItems()
+    }
+
     public func menuItems(in group: MenuGroup) -> [MenuItemConfiguration] {
         sortedMenuItems.filter { $0.group == group }
     }
@@ -176,6 +180,16 @@ public final class MenuManagementViewModel: ObservableObject {
 
     public func updateEnableFileIconPresets(_ enabled: Bool) {
         configuration.appSettings.enableFileIconPresets = enabled
+        persistIfPossible()
+    }
+
+    public func updateShowToolboxIcons(_ enabled: Bool) {
+        configuration.appSettings.showToolboxIcons = enabled
+        persistIfPossible()
+    }
+
+    public func updateEnableToolbox(_ enabled: Bool) {
+        configuration.appSettings.enableToolbox = enabled
         persistIfPossible()
     }
 
@@ -345,6 +359,20 @@ public final class MenuManagementViewModel: ObservableObject {
 
     public func resetFileIconPresets() {
         configuration.fileIconPresets = FileIconConfiguration.defaultPresets
+        persistIfPossible()
+    }
+
+    public func updateToolboxItem(_ item: ToolboxItemConfiguration) {
+        guard let index = configuration.toolboxItems.firstIndex(where: { $0.id == item.id }) else {
+            return
+        }
+        configuration.toolboxItems[index] = item
+        configuration.normalizeOrder()
+        persistIfPossible()
+    }
+
+    public func resetToolboxItems() {
+        configuration.toolboxItems = ToolboxItemConfiguration.defaultItems
         persistIfPossible()
     }
 

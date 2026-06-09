@@ -12,4 +12,11 @@ public enum MenuActionType: String, Codable, Sendable {
     case openDirectory
     case applyFileIcon
     case removeCustomIcon
+    case showFileInfo
+    case copyFileName
+    case createFolderFromFileName
+    case hideSelectedItems
+    case unhideSelectedItems
+    case hideDirectoryItems
+    case unhideDirectoryItems
 }

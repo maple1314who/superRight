@@ -17,10 +17,20 @@ public enum AppExecutionAction: String, Codable, Equatable, Sendable {
     case openDirectory
     case applyFileIcon
     case removeCustomIcon
+    case showFileInfo
+    case copyFileName
+    case createFolderFromFileName
+    case hideSelectedItems
+    case unhideSelectedItems
+    case hideDirectoryItems
+    case unhideDirectoryItems
 
     public var externalApplication: ExternalApplication? {
         switch self {
-        case .createFolder, .createFile, .copyToDirectory, .moveToDirectory, .openDirectory, .applyFileIcon, .removeCustomIcon:
+        case .createFolder, .createFile, .copyToDirectory, .moveToDirectory, .openDirectory,
+             .applyFileIcon, .removeCustomIcon, .showFileInfo, .copyFileName,
+             .createFolderFromFileName, .hideSelectedItems, .unhideSelectedItems,
+             .hideDirectoryItems, .unhideDirectoryItems:
             return nil
         case .openTerminal:
             return .terminal
@@ -53,6 +63,7 @@ public struct AppExecutionRequest: Codable, Sendable {
     public var destinationPath: String?
     public var iconSystemImageName: String?
     public var iconColorName: String?
+    public var toolboxOption: String?
     public var openAfterCreate: Bool
     public var playSoundAfterCreate: Bool
 
@@ -69,6 +80,7 @@ public struct AppExecutionRequest: Codable, Sendable {
         case destinationPath
         case iconSystemImageName
         case iconColorName
+        case toolboxOption
         case openAfterCreate
         case playSoundAfterCreate
     }
@@ -86,6 +98,7 @@ public struct AppExecutionRequest: Codable, Sendable {
         destinationPath: String? = nil,
         iconSystemImageName: String? = nil,
         iconColorName: String? = nil,
+        toolboxOption: String? = nil,
         openAfterCreate: Bool = false,
         playSoundAfterCreate: Bool = false
     ) {
@@ -101,6 +114,7 @@ public struct AppExecutionRequest: Codable, Sendable {
         self.destinationPath = destinationPath
         self.iconSystemImageName = iconSystemImageName
         self.iconColorName = iconColorName
+        self.toolboxOption = toolboxOption
         self.openAfterCreate = openAfterCreate
         self.playSoundAfterCreate = playSoundAfterCreate
     }
@@ -119,6 +133,7 @@ public struct AppExecutionRequest: Codable, Sendable {
         self.destinationPath = try container.decodeIfPresent(String.self, forKey: .destinationPath)
         self.iconSystemImageName = try container.decodeIfPresent(String.self, forKey: .iconSystemImageName)
         self.iconColorName = try container.decodeIfPresent(String.self, forKey: .iconColorName)
+        self.toolboxOption = try container.decodeIfPresent(String.self, forKey: .toolboxOption)
         self.openAfterCreate = try container.decodeIfPresent(Bool.self, forKey: .openAfterCreate) ?? false
         self.playSoundAfterCreate = try container.decodeIfPresent(Bool.self, forKey: .playSoundAfterCreate) ?? false
     }

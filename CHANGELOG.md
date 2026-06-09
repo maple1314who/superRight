@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## V3.5.0 - 2026-06-09
+
+### 新增
+- “工具箱”接入真实共享配置，配置界面可启用、编辑名称、重置默认项。
+- Finder 右键菜单支持工具箱基础项：文件信息、拷贝文件名、根据文件名新建文件夹、隐藏/取消隐藏选中项、隐藏/取消隐藏当前目录内容。
+- 主 App 支持执行工具箱请求，覆盖剪贴板写入、目录创建、Finder 隐藏标记和文件信息入口。
+
+### 改进
+- 工具箱动作统一由 Finder Extension 转发到主 App 执行，降低扩展进程权限不稳定风险。
+- 共享配置兼容旧 JSON，历史用户配置会自动补工具箱配置和相关开关。
+- 主 App 与 Finder Extension 版本升级为 `3.5.0 / 2026060905`。
+
+### 验证
+- `swift test`：38 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：`BUILD SUCCEEDED`。
+
 ## V3.4.0 - 2026-06-09
 
 ### 新增

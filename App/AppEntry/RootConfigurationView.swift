@@ -5,8 +5,6 @@ import Shared
 public struct RootConfigurationView: View {
     @StateObject private var viewModel: MenuManagementViewModel
     @State private var selectedSection: SidebarSection = .newFile
-    @State private var toolboxItems = ToolboxItem.defaultItems
-    @State private var showToolboxIcons = true
 
     public init(
         store: ConfigurationStore = UserDefaultsConfigurationStore()
@@ -46,8 +44,7 @@ public struct RootConfigurationView: View {
             )
         case .toolbox:
             ToolboxSettingsView(
-                items: $toolboxItems,
-                showIcons: $showToolboxIcons
+                viewModel: viewModel
             )
         case .general:
             GeneralSettingsView(
@@ -65,7 +62,7 @@ private enum AppVersionInfo {
     static let displayName = "右键增强"
 
     static var version: String {
-        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "3.4.0"
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "3.5.0"
     }
 
     static var sidebarTitle: String {
@@ -672,12 +669,15 @@ private struct FileIconSettingsView: View {
 }
 
 private struct ToolboxSettingsView: View {
-    @Binding var items: [ToolboxItem]
-    @Binding var showIcons: Bool
+    @ObservedObject var viewModel: MenuManagementViewModel
 
     var body: some View {
         VStack(spacing: 12) {
-            ToolboxTableView(items: $items, showIcons: showIcons)
+            ToolboxTableView(
+                items: viewModel.sortedToolboxItems,
+                showIcons: viewModel.configuration.appSettings.showToolboxIcons,
+                update: viewModel.updateToolboxItem
+            )
                 .padding(.horizontal, 20)
                 .padding(.top, 45)
 
@@ -687,13 +687,27 @@ private struct ToolboxSettingsView: View {
                 Spacer()
 
                 Button("重置") {
-                    items = ToolboxItem.defaultItems
+                    viewModel.resetToolboxItems()
                 }
             }
             .padding(.horizontal, 20)
 
             HStack {
-                Toggle("显示图标", isOn: $showIcons)
+                Toggle(
+                    "显示图标",
+                    isOn: Binding(
+                        get: { viewModel.configuration.appSettings.showToolboxIcons },
+                        set: { viewModel.updateShowToolboxIcons($0) }
+                    )
+                )
+
+                Toggle(
+                    "在 Finder 右键菜单启用工具箱",
+                    isOn: Binding(
+                        get: { viewModel.configuration.appSettings.enableToolbox },
+                        set: { viewModel.updateEnableToolbox($0) }
+                    )
+                )
 
                 Spacer()
             }
@@ -952,8 +966,9 @@ private struct FileIconPresetRowView: View {
 }
 
 private struct ToolboxTableView: View {
-    @Binding var items: [ToolboxItem]
+    let items: [ToolboxItemConfiguration]
     let showIcons: Bool
+    let update: (ToolboxItemConfiguration) -> Void
 
     var body: some View {
         SettingsTableFrame {
@@ -967,11 +982,12 @@ private struct ToolboxTableView: View {
                 HeaderCell("选项", width: 260)
             }
         } rows: {
-            ForEach(items.indices, id: \.self) { index in
+            ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                 ToolboxRowView(
-                    item: $items[index],
+                    item: item,
                     showIcon: showIcons,
-                    isOdd: index % 2 == 1
+                    isOdd: index % 2 == 1,
+                    update: update
                 )
             }
         }
@@ -979,31 +995,50 @@ private struct ToolboxTableView: View {
 }
 
 private struct ToolboxRowView: View {
-    @Binding var item: ToolboxItem
+    let item: ToolboxItemConfiguration
     let showIcon: Bool
     let isOdd: Bool
+    let update: (ToolboxItemConfiguration) -> Void
 
     var body: some View {
         HStack(spacing: 0) {
-            Toggle("", isOn: $item.enabled)
+            Toggle(
+                "",
+                isOn: Binding(
+                    get: { item.isEnabled },
+                    set: { update(\.isEnabled, value: $0) }
+                )
+            )
                 .toggleStyle(.checkbox)
                 .labelsHidden()
                 .frame(width: 58)
 
             ZStack {
                 if showIcon {
-                    SmallIconView(systemImage: item.systemImage, tint: item.iconTint)
+                    SmallIconView(systemImage: item.systemImageName, tint: item.iconTint)
                 }
             }
             .frame(width: 74)
 
-            TextField("", text: $item.name)
+            TextField(
+                "",
+                text: Binding(
+                    get: { item.title },
+                    set: { update(\.title, value: $0) }
+                )
+            )
                 .textFieldStyle(.plain)
                 .font(.system(size: 13))
                 .padding(.horizontal, 8)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            Picker("", selection: $item.option) {
+            Picker(
+                "",
+                selection: Binding(
+                    get: { item.option },
+                    set: { update(\.option, value: $0) }
+                )
+            ) {
                 ForEach(item.availableOptions, id: \.self) { option in
                     Text(option).tag(option)
                 }
@@ -1014,6 +1049,12 @@ private struct ToolboxRowView: View {
         }
         .frame(height: 32)
         .background(isOdd ? Color.black.opacity(0.035) : Color.white)
+    }
+
+    private func update<Value>(_ keyPath: WritableKeyPath<ToolboxItemConfiguration, Value>, value: Value) {
+        var updated = item
+        updated[keyPath: keyPath] = value
+        update(updated)
     }
 }
 
@@ -1364,6 +1405,29 @@ private extension FileIconConfiguration {
     }
 }
 
+private extension ToolboxItemConfiguration {
+    var iconTint: Color {
+        switch iconColorName {
+        case "blue":
+            return .blue
+        case "cyan":
+            return .cyan
+        case "green":
+            return .green
+        case "gray":
+            return .gray
+        case "orange":
+            return .orange
+        case "red":
+            return .red
+        case "yellow":
+            return .yellow
+        default:
+            return .blue
+        }
+    }
+}
+
 private struct FileDestination: Identifiable {
     let id = UUID()
     var path: String
@@ -1390,33 +1454,5 @@ private struct FileDestination: Identifiable {
         .init(path: "~/Music", name: "音乐", systemImage: "folder.fill", iconTint: .cyan),
         .init(path: "~/Pictures", name: "图片", systemImage: "folder.fill", iconTint: .cyan),
         .init(path: "~/Movies", name: "影片", systemImage: "folder.fill", iconTint: .cyan)
-    ]
-}
-
-private struct ToolboxItem: Identifiable {
-    let id = UUID()
-    var enabled: Bool
-    var name: String
-    var option: String
-    let availableOptions: [String]
-    let systemImage: String
-    let iconTint: Color
-
-    static let defaultItems: [ToolboxItem] = [
-        .init(enabled: true, name: "文件信息", option: "", availableOptions: [""], systemImage: "info.circle.fill", iconTint: .blue),
-        .init(enabled: true, name: "发送快捷方式到桌面", option: "", availableOptions: [""], systemImage: "arrow.up.right.square.fill", iconTint: .gray),
-        .init(enabled: true, name: "隔空投送", option: "", availableOptions: [""], systemImage: "airplayaudio", iconTint: .blue),
-        .init(enabled: true, name: "拷贝文件(夹)名称", option: "", availableOptions: [""], systemImage: "doc.on.doc.fill", iconTint: .cyan),
-        .init(enabled: true, name: "根据文件名新建文件夹", option: "", availableOptions: [""], systemImage: "folder.fill", iconTint: .cyan),
-        .init(enabled: true, name: "剪切", option: "剪切时不隐藏选中的文件", availableOptions: ["剪切时不隐藏选中的文件", "剪切时隐藏选中的文件"], systemImage: "scissors", iconTint: .blue),
-        .init(enabled: true, name: "iShot贴图、标注", option: "", availableOptions: [""], systemImage: "photo.fill", iconTint: .green),
-        .init(enabled: true, name: "iShot 截图", option: "", availableOptions: [""], systemImage: "photo.fill", iconTint: .green),
-        .init(enabled: true, name: "拷贝路径", option: "", availableOptions: [""], systemImage: "link", iconTint: .green),
-        .init(enabled: true, name: "彻底删除", option: "需要再次确认", availableOptions: ["需要再次确认", "直接删除"], systemImage: "trash.fill", iconTint: .red),
-        .init(enabled: true, name: "取消隐藏全部文件", option: "", availableOptions: [""], systemImage: "eye.fill", iconTint: .gray),
-        .init(enabled: true, name: "隐藏全部文件", option: "", availableOptions: [""], systemImage: "eye.slash.fill", iconTint: .gray),
-        .init(enabled: true, name: "取消隐藏已选文件", option: "", availableOptions: [""], systemImage: "eye.fill", iconTint: .gray),
-        .init(enabled: true, name: "隐藏已选文件", option: "", availableOptions: [""], systemImage: "eye.slash.fill", iconTint: .gray),
-        .init(enabled: true, name: "转为 ICNS 格式", option: "", availableOptions: [""], systemImage: "camera.filters", iconTint: .orange)
     ]
 }

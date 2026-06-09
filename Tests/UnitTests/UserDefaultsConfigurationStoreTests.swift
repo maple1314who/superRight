@@ -62,12 +62,15 @@ final class UserDefaultsConfigurationStoreTests: XCTestCase {
         var legacyObject = rootObject
         legacyObject.removeValue(forKey: "newFileTemplates")
         legacyObject.removeValue(forKey: "fileIconPresets")
+        legacyObject.removeValue(forKey: "toolboxItems")
         if var appSettings = legacyObject["appSettings"] as? [String: Any] {
             appSettings.removeValue(forKey: "monitoredDirectoryPaths")
             appSettings.removeValue(forKey: "hideMenuBarIcon")
             appSettings.removeValue(forKey: "showNewFileIcons")
             appSettings.removeValue(forKey: "showFileIconPresetIcons")
             appSettings.removeValue(forKey: "enableFileIconPresets")
+            appSettings.removeValue(forKey: "showToolboxIcons")
+            appSettings.removeValue(forKey: "enableToolbox")
             appSettings.removeValue(forKey: "openNewFileAfterCreate")
             appSettings.removeValue(forKey: "playSoundAfterCreate")
             legacyObject["appSettings"] = appSettings
@@ -87,6 +90,9 @@ final class UserDefaultsConfigurationStoreTests: XCTestCase {
         XCTAssertFalse(loaded.fileIconPresets.isEmpty)
         XCTAssertTrue(loaded.appSettings.showFileIconPresetIcons)
         XCTAssertTrue(loaded.appSettings.enableFileIconPresets)
+        XCTAssertFalse(loaded.toolboxItems.isEmpty)
+        XCTAssertTrue(loaded.appSettings.showToolboxIcons)
+        XCTAssertTrue(loaded.appSettings.enableToolbox)
         XCTAssertFalse(loaded.appSettings.openNewFileAfterCreate)
         XCTAssertTrue(loaded.appSettings.playSoundAfterCreate)
 

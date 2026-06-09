@@ -17,6 +17,7 @@ public struct MenuDisplayItem: Equatable, Identifiable, Sendable {
     public var destinationPath: String?
     public var iconSystemImageName: String?
     public var iconColorName: String?
+    public var toolboxOption: String?
 
     public init(
         id: String,
@@ -30,7 +31,8 @@ public struct MenuDisplayItem: Equatable, Identifiable, Sendable {
         templateContent: String?,
         destinationPath: String? = nil,
         iconSystemImageName: String? = nil,
-        iconColorName: String? = nil
+        iconColorName: String? = nil,
+        toolboxOption: String? = nil
     ) {
         self.id = id
         self.title = title
@@ -44,6 +46,7 @@ public struct MenuDisplayItem: Equatable, Identifiable, Sendable {
         self.destinationPath = destinationPath
         self.iconSystemImageName = iconSystemImageName
         self.iconColorName = iconColorName
+        self.toolboxOption = toolboxOption
     }
 
     public init(configuration: MenuItemConfiguration) {
@@ -59,5 +62,6 @@ public struct MenuDisplayItem: Equatable, Identifiable, Sendable {
         self.destinationPath = configuration.destinationPath
         self.iconSystemImageName = configuration.iconSystemImageName
         self.iconColorName = configuration.iconColorName
+        self.toolboxOption = configuration.toolboxOption
     }
 }

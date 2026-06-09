@@ -312,6 +312,91 @@ final class MenuBuilderTests: XCTestCase {
         )
     }
 
+    func testToolboxItemsAreAddedForFileSelection() throws {
+        let builder = MenuBuilder(
+            availabilityChecker: MockAvailabilityChecker(unavailableApps: [])
+        )
+        let tempDirectory = try TemporaryDirectory()
+        defer { tempDirectory.remove() }
+        let fileURL = tempDirectory.url.appendingPathComponent("sample.txt")
+        try "hello".data(using: .utf8)?.write(to: fileURL)
+
+        var configuration = SharedConfiguration.default
+        configuration.toolboxItems = [
+            ToolboxItemConfiguration(
+                id: "copy_name",
+                isEnabled: true,
+                title: "拷贝名称",
+                order: 0,
+                actionType: .copyFileName,
+                systemImageName: "doc.on.doc.fill",
+                iconColorName: "cyan"
+            ),
+            ToolboxItemConfiguration(
+                id: "disabled",
+                isEnabled: false,
+                title: "隐藏",
+                order: 1,
+                actionType: .hideSelectedItems,
+                systemImageName: "eye.slash.fill",
+                iconColorName: "gray"
+            )
+        ]
+
+        let context = FinderSelectionContext(
+            selectedItemURLs: [fileURL],
+            currentDirectoryURL: tempDirectory.url
+        )
+
+        let menu = builder.buildMenu(context: context, configuration: configuration)
+        let item = try XCTUnwrap(menu.first { $0.id == "toolbox_copy_name" })
+
+        XCTAssertEqual(item.actionType, .copyFileName)
+        XCTAssertEqual(item.iconSystemImageName, "doc.on.doc.fill")
+        XCTAssertEqual(item.iconColorName, "cyan")
+        XCTAssertFalse(menu.contains { $0.id == "toolbox_disabled" })
+    }
+
+    func testToolboxDirectoryItemsAreAvailableForBlankSpace() throws {
+        let builder = MenuBuilder(
+            availabilityChecker: MockAvailabilityChecker(unavailableApps: [])
+        )
+        let tempDirectory = try TemporaryDirectory()
+        defer { tempDirectory.remove() }
+
+        let context = FinderSelectionContext(
+            selectedItemURLs: [],
+            currentDirectoryURL: tempDirectory.url
+        )
+
+        let menu = builder.buildMenu(context: context, configuration: .default)
+        let actionTypes = Set(menu.map(\.actionType))
+
+        XCTAssertTrue(actionTypes.contains(.hideDirectoryItems))
+        XCTAssertTrue(actionTypes.contains(.unhideDirectoryItems))
+        XCTAssertFalse(actionTypes.contains(.copyFileName))
+    }
+
+    func testToolboxCanBeDisabled() throws {
+        let builder = MenuBuilder(
+            availabilityChecker: MockAvailabilityChecker(unavailableApps: [])
+        )
+        let tempDirectory = try TemporaryDirectory()
+        defer { tempDirectory.remove() }
+        let fileURL = tempDirectory.url.appendingPathComponent("sample.txt")
+        try "hello".data(using: .utf8)?.write(to: fileURL)
+
+        var configuration = SharedConfiguration.default
+        configuration.appSettings.enableToolbox = false
+        let context = FinderSelectionContext(
+            selectedItemURLs: [fileURL],
+            currentDirectoryURL: tempDirectory.url
+        )
+
+        let menu = builder.buildMenu(context: context, configuration: configuration)
+        XCTAssertFalse(menu.contains { $0.id.hasPrefix("toolbox_") })
+    }
+
     func testFavoriteDirectoriesAreAddedForAllScenes() throws {
         let builder = MenuBuilder(
             availabilityChecker: MockAvailabilityChecker(unavailableApps: [])

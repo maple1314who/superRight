@@ -80,7 +80,19 @@ public struct MenuBuilder {
             ) + 1
         )
 
-        return (configuredItems + templateItems + sendToItems + favoriteDirectoryItems + fileIconItems)
+        let toolboxItems = buildToolboxItems(
+            context: context,
+            configuration: configuration,
+            startingOrder: max(
+                configuredItems.map(\.order).max() ?? -1,
+                templateItems.map(\.order).max() ?? -1,
+                sendToItems.map(\.order).max() ?? -1,
+                favoriteDirectoryItems.map(\.order).max() ?? -1,
+                fileIconItems.map(\.order).max() ?? -1
+            ) + 1
+        )
+
+        return (configuredItems + templateItems + sendToItems + favoriteDirectoryItems + fileIconItems + toolboxItems)
             .sorted { $0.order < $1.order }
             .map(MenuDisplayItem.init(configuration:))
     }
@@ -240,6 +252,52 @@ public struct MenuBuilder {
             )
         )
         return items
+    }
+
+    /// 根据工具箱配置生成 Finder 右键动作。
+    private func buildToolboxItems(
+        context: FinderSelectionContext,
+        configuration: SharedConfiguration,
+        startingOrder: Int
+    ) -> [MenuItemConfiguration] {
+        guard configuration.appSettings.enableToolbox else {
+            return []
+        }
+
+        return configuration.sortedToolboxItems()
+            .filter { $0.isEnabled }
+            .filter { isToolboxItemVisible($0, context: context) }
+            .enumerated()
+            .map { offset, item in
+                MenuItemConfiguration(
+                    id: "toolbox_\(item.id)",
+                    title: item.title,
+                    isEnabled: true,
+                    order: startingOrder + offset,
+                    group: .tool,
+                    visibility: toolboxVisibility(for: item.actionType),
+                    actionType: item.actionType,
+                    iconSystemImageName: item.systemImageName,
+                    iconColorName: item.iconColorName,
+                    toolboxOption: item.option
+                )
+            }
+    }
+
+    private func isToolboxItemVisible(
+        _ item: ToolboxItemConfiguration,
+        context: FinderSelectionContext
+    ) -> Bool {
+        toolboxVisibility(for: item.actionType).isVisible(in: context.scene)
+    }
+
+    private func toolboxVisibility(for actionType: MenuActionType) -> SceneVisibility {
+        switch actionType {
+        case .hideDirectoryItems, .unhideDirectoryItems:
+            return SceneVisibility(blankSpace: true, file: false, folder: true)
+        default:
+            return SceneVisibility(blankSpace: false, file: true, folder: true)
+        }
     }
 
     private func shouldKeepMenuItem(

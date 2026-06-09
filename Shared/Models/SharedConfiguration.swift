@@ -11,6 +11,7 @@ public struct SharedConfiguration: Codable, Equatable, Sendable {
     public var sendToDestinations: [FileDestinationConfiguration]
     public var favoriteDirectories: [FileDestinationConfiguration]
     public var fileIconPresets: [FileIconConfiguration]
+    public var toolboxItems: [ToolboxItemConfiguration]
 
     public init(
         menuItems: [MenuItemConfiguration],
@@ -19,7 +20,8 @@ public struct SharedConfiguration: Codable, Equatable, Sendable {
         newFileTemplates: [NewFileTemplateConfiguration] = NewFileTemplateConfiguration.defaultTemplates,
         sendToDestinations: [FileDestinationConfiguration] = FileDestinationConfiguration.defaultSendDestinations,
         favoriteDirectories: [FileDestinationConfiguration] = FileDestinationConfiguration.defaultFavoriteDirectories,
-        fileIconPresets: [FileIconConfiguration] = FileIconConfiguration.defaultPresets
+        fileIconPresets: [FileIconConfiguration] = FileIconConfiguration.defaultPresets,
+        toolboxItems: [ToolboxItemConfiguration] = ToolboxItemConfiguration.defaultItems
     ) {
         self.menuItems = menuItems
         self.appSettings = appSettings
@@ -28,6 +30,7 @@ public struct SharedConfiguration: Codable, Equatable, Sendable {
         self.sendToDestinations = sendToDestinations
         self.favoriteDirectories = favoriteDirectories
         self.fileIconPresets = fileIconPresets
+        self.toolboxItems = toolboxItems
     }
 
     enum CodingKeys: String, CodingKey {
@@ -38,6 +41,7 @@ public struct SharedConfiguration: Codable, Equatable, Sendable {
         case sendToDestinations
         case favoriteDirectories
         case fileIconPresets
+        case toolboxItems
     }
 
     public init(from decoder: Decoder) throws {
@@ -63,6 +67,10 @@ public struct SharedConfiguration: Codable, Equatable, Sendable {
             [FileIconConfiguration].self,
             forKey: .fileIconPresets
         ) ?? FileIconConfiguration.defaultPresets
+        self.toolboxItems = try container.decodeIfPresent(
+            [ToolboxItemConfiguration].self,
+            forKey: .toolboxItems
+        ) ?? ToolboxItemConfiguration.defaultItems
     }
 
     /// 统一修正所有可排序配置的顺序值，保证 UI、菜单构建和持久化顺序一致。
@@ -107,6 +115,14 @@ public struct SharedConfiguration: Codable, Equatable, Sendable {
                 next.order = index
                 return next
             }
+        toolboxItems = toolboxItems
+            .sorted { $0.order < $1.order }
+            .enumerated()
+            .map { index, item in
+                var next = item
+                next.order = index
+                return next
+            }
     }
 
     public func sortedMenuItems() -> [MenuItemConfiguration] {
@@ -127,6 +143,10 @@ public struct SharedConfiguration: Codable, Equatable, Sendable {
 
     public func sortedFileIconPresets() -> [FileIconConfiguration] {
         fileIconPresets.sorted { $0.order < $1.order }
+    }
+
+    public func sortedToolboxItems() -> [ToolboxItemConfiguration] {
+        toolboxItems.sorted { $0.order < $1.order }
     }
 
     /// 将旧配置补齐到当前版本默认结构。
@@ -198,6 +218,18 @@ public struct SharedConfiguration: Codable, Equatable, Sendable {
                 appended.order = nextOrder
                 nextOrder += 1
                 upgraded.fileIconPresets.append(appended)
+            }
+        }
+
+        let existingToolboxIDs = Set(upgraded.toolboxItems.map(\.id))
+        let missingToolboxItems = defaultConfiguration.toolboxItems.filter { !existingToolboxIDs.contains($0.id) }
+        if !missingToolboxItems.isEmpty {
+            var nextOrder = (upgraded.toolboxItems.map(\.order).max() ?? -1) + 1
+            for item in missingToolboxItems {
+                var appended = item
+                appended.order = nextOrder
+                nextOrder += 1
+                upgraded.toolboxItems.append(appended)
             }
         }
 
@@ -281,6 +313,7 @@ public struct SharedConfiguration: Codable, Equatable, Sendable {
         newFileTemplates: NewFileTemplateConfiguration.defaultTemplates,
         sendToDestinations: FileDestinationConfiguration.defaultSendDestinations,
         favoriteDirectories: FileDestinationConfiguration.defaultFavoriteDirectories,
-        fileIconPresets: FileIconConfiguration.defaultPresets
+        fileIconPresets: FileIconConfiguration.defaultPresets,
+        toolboxItems: ToolboxItemConfiguration.defaultItems
     )
 }

@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## V4.0.5 - 2026-06-09
+
+### 重构
+- 新增主 App `AppExecutionIconAdapter`，集中处理 Finder 自定义图标目标解析、导入图片解码、SF Symbol 预设渲染和 `NSWorkspace.setIcon` 写入/移除。
+- `AppExecutionRequestHandler` 改为只委托图标适配器执行文件/文件夹图标动作，减少主处理器中的 AppKit 图标细节。
+- 主 App 与 Finder Extension 版本升级为 `4.0.5 / 2026060929`。
+
+### 验证
+- `swift test`：55 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+- 已安装 `/Applications/右键增强.app`，主 App 和 Finder Extension 均为 `4.0.5 / 2026060929`，插件注册为 `com.maple.right.superright.RightClickFinderExtension(4.0.5)`。
+- 最近 5 分钟未发现 `右键增强` 或 `RightClickFinderExtension` 新崩溃报告。
+
 ## V4.0.4 - 2026-06-09
 
 ### 重构

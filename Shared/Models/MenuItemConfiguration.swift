@@ -4,6 +4,8 @@ import Foundation
 ///
 /// 该模型保存内置菜单项和动态模板项进入 `MenuBuilder` 前所需的共享字段。
 /// `templateData` 用于跨 Shared、ExtensionCore 和 IPC 保留导入模板的原始字节。
+/// `promotedToMainMenu` 仅用于菜单展示层，表示该动态项需要跳过分类子菜单直接放到根菜单；
+/// 该字段为可选值，保证历史持久化配置缺失该字段时仍能正常解码。
 public struct MenuItemConfiguration: Codable, Equatable, Identifiable, Sendable {
     public var id: String
     public var title: String
@@ -22,6 +24,7 @@ public struct MenuItemConfiguration: Codable, Equatable, Identifiable, Sendable 
     public var iconColorName: String?
     public var importedIconImageData: Data?
     public var toolboxOption: String?
+    public var promotedToMainMenu: Bool?
     public var requiresInstallationCheck: Bool
 
     public init(
@@ -42,6 +45,7 @@ public struct MenuItemConfiguration: Codable, Equatable, Identifiable, Sendable 
         iconColorName: String? = nil,
         importedIconImageData: Data? = nil,
         toolboxOption: String? = nil,
+        promotedToMainMenu: Bool? = nil,
         requiresInstallationCheck: Bool = false
     ) {
         self.id = id
@@ -61,6 +65,7 @@ public struct MenuItemConfiguration: Codable, Equatable, Identifiable, Sendable 
         self.iconColorName = iconColorName
         self.importedIconImageData = importedIconImageData
         self.toolboxOption = toolboxOption
+        self.promotedToMainMenu = promotedToMainMenu
         self.requiresInstallationCheck = requiresInstallationCheck
     }
 }

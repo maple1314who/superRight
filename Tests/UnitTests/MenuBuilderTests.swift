@@ -160,7 +160,42 @@ final class MenuBuilderTests: XCTestCase {
         XCTAssertEqual(jsonItem.defaultFileName, "Untitled.json")
         XCTAssertEqual(jsonItem.templateContent, "{}\n")
         XCTAssertEqual(jsonItem.templateData, Data([0x7B, 0x7D, 0x0A]))
+        XCTAssertFalse(jsonItem.isPromotedToMainMenu)
         XCTAssertFalse(ids.contains("new_file_template_disabled"))
+    }
+
+    func testNewFileTemplateMainMenuFlagIsPropagated() throws {
+        let builder = MenuBuilder(
+            availabilityChecker: MockAvailabilityChecker(unavailableApps: [])
+        )
+        let tempDirectory = try TemporaryDirectory()
+        defer { tempDirectory.remove() }
+
+        let context = FinderSelectionContext(
+            selectedItemURLs: [],
+            currentDirectoryURL: tempDirectory.url
+        )
+
+        var configuration = SharedConfiguration.default
+        configuration.newFileTemplates = [
+            NewFileTemplateConfiguration(
+                id: "root_template",
+                isEnabled: true,
+                title: "根菜单模板",
+                fileExtension: "txt",
+                showInMainMenu: true,
+                order: 0,
+                defaultFileName: "Root.txt",
+                systemImageName: "doc",
+                iconColorName: "blue"
+            )
+        ]
+
+        let menu = builder.buildMenu(context: context, configuration: configuration)
+        let item = try XCTUnwrap(menu.first { $0.id == "new_file_template_root_template" })
+
+        XCTAssertTrue(item.isPromotedToMainMenu)
+        XCTAssertEqual(item.group, .create)
     }
 
     func testNewFileTemplatesAreHiddenForFileSelection() throws {

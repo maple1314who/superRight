@@ -5,6 +5,8 @@ import Shared
 ///
 /// 该模型是 `MenuBuilder` 输出给 Finder Extension 的轻量 DTO，只包含展示、
 /// 排序和动作执行所需字段，避免扩展进程直接依赖完整配置模型。
+/// `isPromotedToMainMenu` 由“新建文件”模板的“主菜单”开关驱动，
+/// Finder 展示层据此决定是否跳过分类子菜单。
 public struct MenuDisplayItem: Equatable, Identifiable, Sendable {
     public var id: String
     public var title: String
@@ -21,6 +23,7 @@ public struct MenuDisplayItem: Equatable, Identifiable, Sendable {
     public var iconColorName: String?
     public var importedIconImageData: Data?
     public var toolboxOption: String?
+    public var isPromotedToMainMenu: Bool
 
     public init(
         id: String,
@@ -37,7 +40,8 @@ public struct MenuDisplayItem: Equatable, Identifiable, Sendable {
         iconSystemImageName: String? = nil,
         iconColorName: String? = nil,
         importedIconImageData: Data? = nil,
-        toolboxOption: String? = nil
+        toolboxOption: String? = nil,
+        isPromotedToMainMenu: Bool = false
     ) {
         self.id = id
         self.title = title
@@ -54,6 +58,7 @@ public struct MenuDisplayItem: Equatable, Identifiable, Sendable {
         self.iconColorName = iconColorName
         self.importedIconImageData = importedIconImageData
         self.toolboxOption = toolboxOption
+        self.isPromotedToMainMenu = isPromotedToMainMenu
     }
 
     public init(configuration: MenuItemConfiguration) {
@@ -72,5 +77,6 @@ public struct MenuDisplayItem: Equatable, Identifiable, Sendable {
         self.iconColorName = configuration.iconColorName
         self.importedIconImageData = configuration.importedIconImageData
         self.toolboxOption = configuration.toolboxOption
+        self.isPromotedToMainMenu = configuration.promotedToMainMenu ?? false
     }
 }

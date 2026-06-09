@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## V3.9.6 - 2026-06-09
+
+### 修复
+- “新建文件”里的“主菜单”开关现在会真正影响 Finder 右键菜单：勾选后模板直接显示在根菜单，未勾选则保留在“新建”子菜单。
+
+### 改进
+- Finder 菜单根节点支持动态模板项与分类子菜单按 `order` 稳定混排。
+- 主 App 与 Finder Extension 版本升级为 `3.9.6 / 2026060914`。
+
+### 验证
+- `swift test`：48 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：`BUILD SUCCEEDED`。
+
 ## V3.9.5 - 2026-06-09
 
 ### 修复

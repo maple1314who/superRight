@@ -122,7 +122,8 @@ public struct MenuBuilder {
                     fileExtension: template.normalizedFileExtension,
                     defaultFileName: template.defaultFileName,
                     templateContent: template.templateContent,
-                    templateData: template.templateData
+                    templateData: template.templateData,
+                    promotedToMainMenu: template.showInMainMenu
                 )
             }
     }

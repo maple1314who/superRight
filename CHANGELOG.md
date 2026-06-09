@@ -7,9 +7,16 @@
 - `AppExecutionRequestHandler` 的 `.icns`、macOS `.iconset`、iOS `AppIcon.appiconset` 转换动作改为只保留策略入口并委托图片转换适配器。
 - 主 App 与 Finder Extension 版本升级为 `4.0.29 / 2026060953`。
 
+### 发布
+- 已生成 Release DMG：`SuperRight-4.0.29.dmg`，SHA256 为 `050ec664c936c3144c7a14470c7f6713f82de037ea03db0c139ed25b914e9e5f`。
+- 已生成 Sparkle `appcast.xml`，包含 `sparkle:version=2026060953`、`sparkle:shortVersionString=4.0.29` 和 EdDSA 签名。
+- GitHub Release 发布由 `superRight` 仓库工作流上传 `发布/V4.0.29/SuperRight-4.0.29.dmg` 与 `发布/V4.0.29/appcast.xml`。
+- 当前包仍使用 Apple Development 证书签名，外部分发前仍需要 Developer ID 签名与 notarization。
+
 ### 验证
 - `swift test`：55 tests, 0 failures。
 - `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Release -destination platform=macOS -derivedDataPath build/PackageRelease build`：BUILD SUCCEEDED。
 - 已安装 `/Applications/右键增强.app`，主 App 和 Finder Extension 均为 `4.0.29 / 2026060953`，插件注册为 `com.maple.right.superright.RightClickFinderExtension(4.0.29)`；最近 5 分钟未发现新崩溃报告。
 
 ## V4.0.28 - 2026-06-09

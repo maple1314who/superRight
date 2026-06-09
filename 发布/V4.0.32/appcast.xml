@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>右键增强</title>
+        <item>
+            <title>4.0.32</title>
+            <description><![CDATA[<h2>右键增强 4.0.32</h2><ul><li>修复 Finder 扩展监听目录误写为沙盒目录，升级后自动恢复到真实用户目录。</li><li>升级安装前和新版本启动时主动结束旧 Finder 扩展进程，避免旧右键菜单残留。</li></ul>]]></description>
+            <sparkle:version>2026060956</sparkle:version>
+            <sparkle:shortVersionString>4.0.32</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
+            <enclosure url="https://github.com/maple1314who/superRight/releases/latest/download/SuperRight-4.0.32.dmg" length="4314863" type="application/octet-stream" sparkle:edSignature="NY+ySF7Ja3h1hyKMSXtm8TcbY4lOy8eLdbZaqm+cO2bpWOPmNMY18rsFaB8N8WrpbAMPmpnbt+eFn3SmTxhtCQ=="/>
+        </item>
+    </channel>
+</rss>

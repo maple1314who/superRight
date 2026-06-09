@@ -226,8 +226,11 @@ public struct SharedConfiguration: Codable, Equatable, Sendable {
             .map(Self.standardizedPath)
             .filter { !$0.isEmpty }
         let legacyDesktopPath = Self.standardizedPath(AppSettings.legacyDesktopPath)
+        let legacySandboxHomePath = Self.standardizedPath(AppSettings.legacySandboxHomePath)
 
-        guard monitoredPaths.isEmpty || monitoredPaths == [legacyDesktopPath] else {
+        guard monitoredPaths.isEmpty ||
+            monitoredPaths == [legacyDesktopPath] ||
+            monitoredPaths == [legacySandboxHomePath] else {
             appSettings.monitoredDirectoryPaths = monitoredPaths
             return
         }

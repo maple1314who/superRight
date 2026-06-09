@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - '.github/workflows/publish-sparkle-release.yml'
-      - '发布/V4.0.31/**'
+      - '发布/V4.0.32/**'
   workflow_dispatch:
 
 permissions:
@@ -19,23 +19,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Create or update v4.0.31 release
+      - name: Create or update v4.0.32 release
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          tag='v4.0.31'
-          asset_dir='发布/V4.0.31'
+          tag='v4.0.32'
+          asset_dir='发布/V4.0.32'
           if ! gh release view "$tag" --repo "$REPO" >/dev/null 2>&1; then
             gh release create "$tag" \
               --repo "$REPO" \
               --verify-tag \
-              --title '右键增强 4.0.31' \
+              --title '右键增强 4.0.32' \
               --notes-file "$asset_dir/release-notes.md"
           fi
           gh release upload "$tag" \
-            "$asset_dir/SuperRight-4.0.31.dmg" \
+            "$asset_dir/SuperRight-4.0.32.dmg" \
             "$asset_dir/appcast.xml" \
             --repo "$REPO" \
             --clobber

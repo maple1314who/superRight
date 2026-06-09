@@ -1,5 +1,25 @@
 # CHANGELOG
 
+## V4.0.32 - 2026-06-09
+
+### 修复
+- `AppSettings.defaultHomePath` 改为读取 POSIX 真实用户 Home，避免沙盒 App 内 `NSHomeDirectory()` 返回 `~/Library/Containers/com.maple.right.superright/Data` 导致 Finder 右键扩展只在沙盒目录生效。
+- `SharedConfiguration.upgradedWithDefaults()` 新增旧沙盒 Home 监听路径迁移，已保存的错误默认配置会自动恢复为 `/Users/maple`。
+- 主 App 启动时也会主动结束旧 Finder Extension 进程；Sparkle 升级前、升级重启前和新版本启动后都有清理兜底，减少旧右键菜单残留。
+- 主 App 与 Finder Extension 版本升级为 `4.0.32 / 2026060956`。
+
+### 发布
+- 已生成 Release DMG：`SuperRight-4.0.32.dmg`，SHA256 为 `8ef01b30307bc0a5a24d5fd4e0b6efba822c19f6a9e947731fe6b9727fbb7bfa`。
+- 已生成 Sparkle `appcast.xml`，包含 `sparkle:version=2026060956`、`sparkle:shortVersionString=4.0.32` 和 EdDSA 签名。
+- GitHub Release 发布由 `superRight` 仓库工作流上传 `发布/V4.0.32/SuperRight-4.0.32.dmg` 与 `发布/V4.0.32/appcast.xml`。
+- Developer ID 签名与公证按当前需求明确不作为目标项。
+
+### 验证
+- `swift test`：56 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Release -destination platform=macOS -derivedDataPath build/PackageRelease build`：BUILD SUCCEEDED。
+- 本机安装 `/Applications/右键增强.app` 后，`pluginkit` 仅注册 `com.maple.right.superright.RightClickFinderExtension(4.0.32)`；Finder Extension 日志显示 `directoryURLs applied ... paths=/Users/maple`。
+
 ## V4.0.31 - 2026-06-09
 
 ### 改进

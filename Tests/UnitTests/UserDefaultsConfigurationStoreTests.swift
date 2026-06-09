@@ -120,6 +120,27 @@ final class UserDefaultsConfigurationStoreTests: XCTestCase {
         defaults.removePersistentDomain(forName: suiteName)
     }
 
+    func testLoadMigratesLegacySandboxHomeOnlyMonitoredDirectoryToRealHome() throws {
+        let suiteName = "superright.tests.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            XCTFail("无法创建测试用 UserDefaults")
+            return
+        }
+
+        let store = UserDefaultsConfigurationStore(
+            suiteName: suiteName,
+            userDefaults: defaults
+        )
+        var configuration = SharedConfiguration.default
+        configuration.appSettings.monitoredDirectoryPaths = [AppSettings.legacySandboxHomePath]
+        defaults.set(try JSONEncoder().encode(configuration), forKey: SharedConstants.configurationStorageKey)
+
+        let loaded = try store.load()
+
+        XCTAssertEqual(loaded.appSettings.monitoredDirectoryPaths, AppSettings.defaultMonitoredDirectoryPaths)
+        defaults.removePersistentDomain(forName: suiteName)
+    }
+
     func testLoadKeepsCustomMonitoredDirectory() throws {
         let suiteName = "superright.tests.\(UUID().uuidString)"
         guard let defaults = UserDefaults(suiteName: suiteName) else {

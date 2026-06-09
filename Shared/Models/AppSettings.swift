@@ -1,4 +1,5 @@
 import Foundation
+import Darwin
 
 /// 全局应用设置。
 ///
@@ -130,10 +131,29 @@ public struct AppSettings: Codable, Equatable, Sendable {
     }
 
     public static var defaultHomePath: String {
-        NSHomeDirectory()
+        realUserHomePath()
     }
 
     public static var legacyDesktopPath: String {
-        NSHomeDirectory().appending("/Desktop")
+        defaultHomePath.appending("/Desktop")
+    }
+
+    public static var legacySandboxHomePath: String {
+        defaultHomePath.appending("/Library/Containers/com.maple.right.superright/Data")
+    }
+
+    /// Finder Sync 的监听根目录必须是真实用户 Home。
+    ///
+    /// 沙盒 App 内的 `NSHomeDirectory()` 会返回
+    /// `~/Library/Containers/<bundle>/Data`，如果把它写入配置，Finder 普通目录
+    /// 右键菜单就不会加载。这里直接读取 POSIX 用户数据库，保证主 App 和扩展
+    /// 进程都得到同一个真实 Home。
+    private static func realUserHomePath() -> String {
+        guard let passwd = getpwuid(getuid()),
+              let homeCString = passwd.pointee.pw_dir else {
+            return NSHomeDirectory()
+        }
+
+        return String(cString: homeCString)
     }
 }

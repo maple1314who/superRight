@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## V4.0.29 - 2026-06-09
+
+### 重构
+- `AppExecutionImageConversionAdapter` 接管图片转换动作的 Finder 选中项解析、URL 去重、图片转换和产物写入。
+- `AppExecutionRequestHandler` 的 `.icns`、macOS `.iconset`、iOS `AppIcon.appiconset` 转换动作改为只保留策略入口并委托图片转换适配器。
+- 主 App 与 Finder Extension 版本升级为 `4.0.29 / 2026060953`。
+
+### 验证
+- `swift test`：55 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+- 已安装 `/Applications/右键增强.app`，主 App 和 Finder Extension 均为 `4.0.29 / 2026060953`，插件注册为 `com.maple.right.superright.RightClickFinderExtension(4.0.29)`；最近 5 分钟未发现新崩溃报告。
+
 ## V4.0.28 - 2026-06-09
 
 ### 重构

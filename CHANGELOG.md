@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## V4.0.17 - 2026-06-09
+
+### 重构
+- 新增主 App `AppExecutionFolderNameAdapter`，集中处理按选中项名称创建同名文件夹的目标解析、冲突命名和目录创建。
+- `AppExecutionRequestHandler` 的“按文件名创建文件夹”动作改为只负责策略入口并委托适配器执行。
+- 主 App 与 Finder Extension 版本升级为 `4.0.17 / 2026060941`。
+
+### 验证
+- `swift test`：55 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+- 已安装 `/Applications/右键增强.app`，主 App 和 Finder Extension 均为 `4.0.17 / 2026060941`，插件注册为 `com.maple.right.superright.RightClickFinderExtension(4.0.17)`；最近 5 分钟未发现新崩溃报告。
+
 ## V4.0.16 - 2026-06-09
 
 ### 重构

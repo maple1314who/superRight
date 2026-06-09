@@ -147,6 +147,9 @@ final class UserDefaultsConfigurationStoreTests: XCTestCase {
 
         if var toolboxItems = rootObject["toolboxItems"] as? [[String: Any]] {
             toolboxItems.removeAll { ($0["id"] as? String) == "send_via_airdrop" }
+            toolboxItems.removeAll { ($0["id"] as? String) == "cut_items" }
+            toolboxItems.removeAll { ($0["id"] as? String) == "open_ishot" }
+            toolboxItems.removeAll { ($0["id"] as? String) == "convert_to_icns" }
             toolboxItems.removeAll { ($0["id"] as? String) == "permanently_delete" }
             rootObject["toolboxItems"] = toolboxItems
         } else {
@@ -165,6 +168,9 @@ final class UserDefaultsConfigurationStoreTests: XCTestCase {
             ExternalApplication.idea.defaultBundlePath
         )
         XCTAssertNotNil(loaded.toolboxItems.first { $0.id == "send_via_airdrop" })
+        XCTAssertNotNil(loaded.toolboxItems.first { $0.id == "cut_items" })
+        XCTAssertNotNil(loaded.toolboxItems.first { $0.id == "open_ishot" })
+        XCTAssertNotNil(loaded.toolboxItems.first { $0.id == "convert_to_icns" })
         XCTAssertEqual(
             loaded.toolboxItems.first { $0.id == "permanently_delete" }?.isEnabled,
             false

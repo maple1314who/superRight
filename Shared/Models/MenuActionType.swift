@@ -16,6 +16,9 @@ public enum MenuActionType: String, Codable, Sendable {
     case copyFileName
     case createFolderFromFileName
     case sendViaAirDrop
+    case cutItems
+    case openIShot
+    case convertToICNS
     case permanentlyDelete
     case hideSelectedItems
     case unhideSelectedItems

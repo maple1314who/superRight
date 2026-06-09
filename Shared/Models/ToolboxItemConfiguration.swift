@@ -72,12 +72,39 @@ public struct ToolboxItemConfiguration: Codable, Equatable, Identifiable, Sendab
             systemImageName: "paperplane.fill",
             iconColorName: "blue"
         ),
+        .init(
+            id: "cut_items",
+            isEnabled: true,
+            title: "剪切",
+            order: 4,
+            actionType: .cutItems,
+            systemImageName: "scissors",
+            iconColorName: "orange"
+        ),
+        .init(
+            id: "open_ishot",
+            isEnabled: true,
+            title: "iShot",
+            order: 5,
+            actionType: .openIShot,
+            systemImageName: "camera.viewfinder",
+            iconColorName: "purple"
+        ),
+        .init(
+            id: "convert_to_icns",
+            isEnabled: true,
+            title: "ICNS 转换",
+            order: 6,
+            actionType: .convertToICNS,
+            systemImageName: "app.badge",
+            iconColorName: "indigo"
+        ),
         // 破坏性动作默认关闭，避免升级后用户右键菜单立即出现不可恢复删除入口。
         .init(
             id: "permanently_delete",
             isEnabled: false,
             title: "彻底删除",
-            order: 4,
+            order: 7,
             actionType: .permanentlyDelete,
             systemImageName: "trash.slash.fill",
             iconColorName: "red"
@@ -86,7 +113,7 @@ public struct ToolboxItemConfiguration: Codable, Equatable, Identifiable, Sendab
             id: "hide_selected_items",
             isEnabled: true,
             title: "隐藏已选文件",
-            order: 5,
+            order: 8,
             actionType: .hideSelectedItems,
             systemImageName: "eye.slash.fill",
             iconColorName: "gray"
@@ -95,7 +122,7 @@ public struct ToolboxItemConfiguration: Codable, Equatable, Identifiable, Sendab
             id: "unhide_selected_items",
             isEnabled: true,
             title: "取消隐藏已选文件",
-            order: 6,
+            order: 9,
             actionType: .unhideSelectedItems,
             systemImageName: "eye.fill",
             iconColorName: "gray"
@@ -104,7 +131,7 @@ public struct ToolboxItemConfiguration: Codable, Equatable, Identifiable, Sendab
             id: "hide_directory_items",
             isEnabled: true,
             title: "隐藏全部文件",
-            order: 7,
+            order: 10,
             actionType: .hideDirectoryItems,
             systemImageName: "eye.slash.fill",
             iconColorName: "gray"
@@ -113,7 +140,7 @@ public struct ToolboxItemConfiguration: Codable, Equatable, Identifiable, Sendab
             id: "unhide_directory_items",
             isEnabled: true,
             title: "取消隐藏全部文件",
-            order: 8,
+            order: 11,
             actionType: .unhideDirectoryItems,
             systemImageName: "eye.fill",
             iconColorName: "gray"

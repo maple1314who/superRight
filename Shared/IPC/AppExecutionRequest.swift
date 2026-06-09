@@ -21,6 +21,9 @@ public enum AppExecutionAction: String, Codable, Equatable, Sendable {
     case copyFileName
     case createFolderFromFileName
     case sendViaAirDrop
+    case cutItems
+    case openIShot
+    case convertToICNS
     case permanentlyDelete
     case hideSelectedItems
     case unhideSelectedItems
@@ -31,8 +34,8 @@ public enum AppExecutionAction: String, Codable, Equatable, Sendable {
         switch self {
         case .createFolder, .createFile, .copyToDirectory, .moveToDirectory, .openDirectory,
              .applyFileIcon, .removeCustomIcon, .showFileInfo, .copyFileName,
-             .createFolderFromFileName, .sendViaAirDrop, .permanentlyDelete,
-             .hideSelectedItems, .unhideSelectedItems,
+             .createFolderFromFileName, .sendViaAirDrop, .cutItems, .openIShot,
+             .convertToICNS, .permanentlyDelete, .hideSelectedItems, .unhideSelectedItems,
              .hideDirectoryItems, .unhideDirectoryItems:
             return nil
         case .openTerminal:

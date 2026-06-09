@@ -295,6 +295,10 @@ public struct MenuBuilder {
 
     private func toolboxVisibility(for actionType: MenuActionType) -> SceneVisibility {
         switch actionType {
+        case .openIShot:
+            return SceneVisibility(blankSpace: true, file: true, folder: true)
+        case .convertToICNS:
+            return SceneVisibility(blankSpace: false, file: true, folder: false)
         case .hideDirectoryItems, .unhideDirectoryItems:
             return SceneVisibility(blankSpace: true, file: false, folder: true)
         default:

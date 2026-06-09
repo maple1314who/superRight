@@ -363,7 +363,7 @@ final class MenuBuilderTests: XCTestCase {
         XCTAssertFalse(menu.contains { $0.id == "toolbox_disabled" })
     }
 
-    func testAirDropToolboxItemIsAvailableForFileSelection() throws {
+    func testExtendedToolboxItemsAreAvailableForExpectedScenes() throws {
         let builder = MenuBuilder(
             availabilityChecker: MockAvailabilityChecker(unavailableApps: [])
         )
@@ -377,11 +377,25 @@ final class MenuBuilderTests: XCTestCase {
             currentDirectoryURL: tempDirectory.url
         )
 
-        let menu = builder.buildMenu(context: context, configuration: .default)
-        let item = try XCTUnwrap(menu.first { $0.actionType == .sendViaAirDrop })
+        let fileMenu = builder.buildMenu(context: context, configuration: .default)
+        let airDropItem = try XCTUnwrap(fileMenu.first { $0.actionType == .sendViaAirDrop })
+        let cutItem = try XCTUnwrap(fileMenu.first { $0.actionType == .cutItems })
+        let icnsItem = try XCTUnwrap(fileMenu.first { $0.actionType == .convertToICNS })
 
-        XCTAssertEqual(item.id, "toolbox_send_via_airdrop")
-        XCTAssertEqual(item.title, "隔空投送")
+        XCTAssertEqual(airDropItem.id, "toolbox_send_via_airdrop")
+        XCTAssertEqual(airDropItem.title, "隔空投送")
+        XCTAssertEqual(cutItem.id, "toolbox_cut_items")
+        XCTAssertEqual(cutItem.title, "剪切")
+        XCTAssertEqual(icnsItem.id, "toolbox_convert_to_icns")
+        XCTAssertEqual(icnsItem.title, "ICNS 转换")
+
+        let blankContext = FinderSelectionContext(
+            selectedItemURLs: [],
+            currentDirectoryURL: tempDirectory.url
+        )
+        let blankMenu = builder.buildMenu(context: blankContext, configuration: .default)
+        XCTAssertTrue(blankMenu.contains { $0.actionType == .openIShot })
+        XCTAssertFalse(blankMenu.contains { $0.actionType == .convertToICNS })
     }
 
     func testPermanentDeleteToolboxItemRequiresExplicitEnable() throws {
@@ -434,6 +448,7 @@ final class MenuBuilderTests: XCTestCase {
 
         XCTAssertTrue(actionTypes.contains(.hideDirectoryItems))
         XCTAssertTrue(actionTypes.contains(.unhideDirectoryItems))
+        XCTAssertTrue(actionTypes.contains(.openIShot))
         XCTAssertFalse(actionTypes.contains(.copyFileName))
         XCTAssertFalse(actionTypes.contains(.sendViaAirDrop))
         XCTAssertFalse(actionTypes.contains(.permanentlyDelete))

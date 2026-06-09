@@ -9,7 +9,7 @@
 
 ### 改进
 - 发版流程增加 Sparkle EdDSA 公钥、DMG 包和 Appcast 生成记录。
-- 新增 GitHub Actions 发布工作流，将 `右键增强-3.9.0.dmg` 和 `appcast.xml` 上传到 `v3.9.0` Release，供 Sparkle 在线检测更新。
+- 新增 GitHub Actions 发布工作流，将 `SuperRight-3.9.0.dmg` 和 `appcast.xml` 上传到 `v3.9.0` Release，供 Sparkle 在线检测更新。
 - 主 App 与 Finder Extension 版本升级为 `3.9.0 / 2026060909`。
 
 ### 验证
@@ -17,7 +17,7 @@
 - `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：`BUILD SUCCEEDED`。
 - `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Release -destination platform=macOS -derivedDataPath build/DerivedData build`：`BUILD SUCCEEDED`。
 - Sparkle Appcast 已生成并包含 `sparkle:edSignature`。
-- GitHub Release 资源需在推送后由 Actions 上传，线上 `appcast.xml` 返回 200 后 Sparkle 才能检测到更新。
+- GitHub Release 资源已公开验证，`appcast.xml` 和 `SuperRight-3.9.0.dmg` 均返回 HTTP 200。
 
 ## V3.8.0 - 2026-06-09
 

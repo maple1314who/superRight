@@ -35,7 +35,7 @@ jobs:
               --notes-file "$asset_dir/release-notes.md"
           fi
           gh release upload "$tag" \
-            "$asset_dir/右键增强-3.9.0.dmg" \
+            "$asset_dir/SuperRight-3.9.0.dmg" \
             "$asset_dir/appcast.xml" \
             --repo "$REPO" \
             --clobber

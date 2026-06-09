@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## V3.10.1 - 2026-06-09
+
+### 修复
+- 关闭整窗背景拖拽，避免干扰表格行拖拽和下拉菜单选择。
+- 新增只覆盖右侧内容区顶部空白区域的窗口拖拽热区。
+- 主 App 与 Finder Extension 版本升级为 `3.10.1 / 2026060919`。
+
+### 验证
+- `swift test`：51 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+
 ## V3.10.0 - 2026-06-09
 
 ### 调整

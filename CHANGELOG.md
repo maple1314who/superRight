@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## V4.0.20 - 2026-06-09
+
+### 重构
+- 新增主 App `AppExecutionCreationAdapter`，集中处理新建文件夹、新建文件、模板写入、创建后提示音和自动打开。
+- `AppExecutionRequestHandler` 的新建动作改为只负责策略入口并委托创建适配器执行。
+- 主 App 与 Finder Extension 版本升级为 `4.0.20 / 2026060944`。
+
+### 验证
+- `swift test`：55 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+- 已安装 `/Applications/右键增强.app`，主 App 和 Finder Extension 均为 `4.0.20 / 2026060944`，插件注册为 `com.maple.right.superright.RightClickFinderExtension(4.0.20)`；最近 5 分钟未发现新崩溃报告。
+
 ## V4.0.19 - 2026-06-09
 
 ### 重构

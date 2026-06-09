@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## V4.0.16 - 2026-06-09
+
+### 重构
+- 新增主 App `AppExecutionTextToolAdapter`，集中处理复制文件名、翻译选中文本、路径二维码等文本派生动作。
+- `AppExecutionRequestHandler` 的文本工具动作改为只负责策略入口和日志记录，移除无用主线程辅助函数。
+- 主 App 与 Finder Extension 版本升级为 `4.0.16 / 2026060940`。
+
+### 验证
+- `swift test`：55 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+- 已安装 `/Applications/右键增强.app`，主 App 和 Finder Extension 均为 `4.0.16 / 2026060940`，插件注册为 `com.maple.right.superright.RightClickFinderExtension(4.0.16)`；最近 5 分钟未发现新崩溃报告。
+
 ## V4.0.15 - 2026-06-09
 
 ### 重构

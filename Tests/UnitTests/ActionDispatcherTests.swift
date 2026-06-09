@@ -26,7 +26,89 @@ private final class MockClipboardWriter: ClipboardWriting {
     }
 }
 
+private final class SpyActionExecutionObserver: ActionExecutionObserving {
+    private(set) var willExecuteActionTypes: [MenuActionType] = []
+    private(set) var finishedActionTypes: [MenuActionType] = []
+    private(set) var failedActionTypes: [MenuActionType] = []
+
+    func actionWillExecute(_ request: ActionExecutionRequestContext) {
+        willExecuteActionTypes.append(request.item.actionType)
+    }
+
+    func actionDidFinish(_ request: ActionExecutionRequestContext, resultURL: URL?) {
+        finishedActionTypes.append(request.item.actionType)
+    }
+
+    func actionDidFail(_ request: ActionExecutionRequestContext, error: Error) {
+        failedActionTypes.append(request.item.actionType)
+    }
+}
+
 final class ActionDispatcherTests: XCTestCase {
+    func testV4FactoryProvidesForwardedOnlyStrategyForAppOnlyActions() throws {
+        let strategy = MenuActionStrategyFactory().makeStrategy(for: .applyFileIcon)
+        let temporaryDirectory = try TemporaryDirectory()
+        defer { temporaryDirectory.remove() }
+        let request = ActionExecutionRequestContext(
+            item: MenuDisplayItem(
+                id: "apply_icon",
+                title: "应用图标",
+                order: 0,
+                group: .tool,
+                actionType: .applyFileIcon,
+                targetApplication: nil,
+                fileExtension: nil,
+                defaultFileName: nil,
+                templateContent: nil
+            ),
+            finderContext: FinderSelectionContext(
+                selectedItemURLs: [],
+                currentDirectoryURL: temporaryDirectory.url
+            ),
+            configuration: .default
+        )
+        let adapters = ActionExecutionAdapters(
+            fileSystem: FileSystemActionAdapter(
+                fileManager: .default,
+                commandRunner: MockCommandRunner()
+            ),
+            externalApplications: ExternalApplicationActionAdapter(
+                commandRunner: MockCommandRunner()
+            ),
+            clipboardWriter: MockClipboardWriter()
+        )
+
+        let resultURL = try strategy.execute(request: request, adapters: adapters)
+
+        XCTAssertNil(resultURL)
+    }
+
+    func testV4ObserverReceivesActionLifecycleEvents() throws {
+        let observer = SpyActionExecutionObserver()
+        let clipboardWriter = MockClipboardWriter()
+        let dispatcher = ActionDispatcher(
+            commandRunner: MockCommandRunner(),
+            clipboardWriter: clipboardWriter,
+            observers: [observer]
+        )
+        let temporaryDirectory = try TemporaryDirectory()
+        defer { temporaryDirectory.remove() }
+        let context = FinderSelectionContext(
+            selectedItemURLs: [],
+            currentDirectoryURL: temporaryDirectory.url
+        )
+        let item = MenuDisplayItem(
+            configuration: SharedConfiguration.default.menuItems.first { $0.id == "copy_path" }!
+        )
+
+        _ = try dispatcher.execute(item: item, context: context, configuration: .default)
+
+        XCTAssertEqual(observer.willExecuteActionTypes, [.copyPath])
+        XCTAssertEqual(observer.finishedActionTypes, [.copyPath])
+        XCTAssertEqual(observer.failedActionTypes, [])
+        XCTAssertEqual(clipboardWriter.copiedText, temporaryDirectory.url.path)
+    }
+
     func testCreateFileWithConflictNaming() throws {
         let commandRunner = MockCommandRunner()
         let clipboardWriter = MockClipboardWriter()

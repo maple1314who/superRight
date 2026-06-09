@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## V4.0.0 - 2026-06-09
+
+### 重构
+- Finder Extension 动作执行链升级为 V4 架构，引入策略、工厂、适配器、观察者四类设计模式。
+- 每类菜单动作拆分为独立 `MenuActionStrategy`，移除执行入口中的大 `switch`。
+- 新增 `MenuActionStrategyFactory` 统一维护 `MenuActionType -> Strategy` 映射。
+- 新增 `FileSystemActionAdapter`、`ExternalApplicationActionAdapter` 隔离文件系统、外部 App 打开和系统版本差异。
+- 新增 `ActionExecutionObserving`，通过观察者记录执行开始、成功和失败事件。
+- 主 App 与 Finder Extension 版本升级为 `4.0.0 / 2026060924`。
+
+### 验证
+- `swift test`：53 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+
 ## V3.10.5 - 2026-06-09
 
 ### 修复

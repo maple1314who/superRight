@@ -36,3 +36,19 @@ public struct NSPasteboardWriter: ClipboardWriting {
         }
     }
 }
+
+/// 系统版本提供者。
+///
+/// V4 执行层通过该协议隔离 `ProcessInfo`，让菜单策略可以基于 macOS 版本选择
+/// 不同适配器实现，也让单元测试可以注入固定系统版本。
+public protocol SystemVersionProviding {
+    var operatingSystemVersion: OperatingSystemVersion { get }
+}
+
+public struct ProcessInfoSystemVersionProvider: SystemVersionProviding {
+    public init() {}
+
+    public var operatingSystemVersion: OperatingSystemVersion {
+        ProcessInfo.processInfo.operatingSystemVersion
+    }
+}

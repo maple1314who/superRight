@@ -414,23 +414,35 @@ final class MenuBuilderTests: XCTestCase {
 
         let fileMenu = builder.buildMenu(context: context, configuration: .default)
         let airDropItem = try XCTUnwrap(fileMenu.first { $0.actionType == .sendViaAirDrop })
+        let shortcutItem = try XCTUnwrap(fileMenu.first { $0.actionType == .sendShortcutToDesktop })
         let cutItem = try XCTUnwrap(fileMenu.first { $0.actionType == .cutItems })
         let icnsItem = try XCTUnwrap(fileMenu.first { $0.actionType == .convertToICNS })
+        let macIconsItem = try XCTUnwrap(fileMenu.first { $0.actionType == .convertToMacIcons })
+        let iosIconsItem = try XCTUnwrap(fileMenu.first { $0.actionType == .convertToIOSIcons })
+        let qrCodeItem = try XCTUnwrap(fileMenu.first { $0.actionType == .createQRCode })
 
         XCTAssertEqual(airDropItem.id, "toolbox_send_via_airdrop")
         XCTAssertEqual(airDropItem.title, "隔空投送")
+        XCTAssertEqual(shortcutItem.id, "toolbox_send_shortcut_to_desktop")
+        XCTAssertEqual(shortcutItem.title, "发送快捷方式到桌面")
         XCTAssertEqual(cutItem.id, "toolbox_cut_items")
         XCTAssertEqual(cutItem.title, "剪切")
         XCTAssertEqual(icnsItem.id, "toolbox_convert_to_icns")
         XCTAssertEqual(icnsItem.title, "ICNS 转换")
+        XCTAssertEqual(macIconsItem.id, "toolbox_convert_to_mac_icons")
+        XCTAssertEqual(iosIconsItem.id, "toolbox_convert_to_ios_icons")
+        XCTAssertEqual(qrCodeItem.id, "toolbox_create_qr_code")
 
         let blankContext = FinderSelectionContext(
             selectedItemURLs: [],
             currentDirectoryURL: tempDirectory.url
         )
         let blankMenu = builder.buildMenu(context: blankContext, configuration: .default)
-        XCTAssertTrue(blankMenu.contains { $0.actionType == .openIShot })
+        XCTAssertTrue(blankMenu.contains { $0.actionType == .openIShotAnnotation })
+        XCTAssertTrue(blankMenu.contains { $0.actionType == .openIShotScreenshot })
         XCTAssertFalse(blankMenu.contains { $0.actionType == .convertToICNS })
+        XCTAssertFalse(blankMenu.contains { $0.actionType == .convertToMacIcons })
+        XCTAssertFalse(blankMenu.contains { $0.actionType == .convertToIOSIcons })
     }
 
     func testPermanentDeleteToolboxItemRequiresExplicitEnable() throws {
@@ -483,7 +495,8 @@ final class MenuBuilderTests: XCTestCase {
 
         XCTAssertTrue(actionTypes.contains(.hideDirectoryItems))
         XCTAssertTrue(actionTypes.contains(.unhideDirectoryItems))
-        XCTAssertTrue(actionTypes.contains(.openIShot))
+        XCTAssertTrue(actionTypes.contains(.openIShotAnnotation))
+        XCTAssertTrue(actionTypes.contains(.openIShotScreenshot))
         XCTAssertFalse(actionTypes.contains(.copyFileName))
         XCTAssertFalse(actionTypes.contains(.sendViaAirDrop))
         XCTAssertFalse(actionTypes.contains(.permanentlyDelete))

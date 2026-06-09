@@ -13,15 +13,23 @@ public enum MenuActionType: String, Codable, Sendable {
     case applyFileIcon
     case removeCustomIcon
     case showFileInfo
+    case sendShortcutToDesktop
     case copyFileName
     case createFolderFromFileName
     case sendViaAirDrop
     case cutItems
     case openIShot
+    case openIShotAnnotation
+    case openIShotScreenshot
     case convertToICNS
+    case convertToMacIcons
+    case convertToIOSIcons
     case permanentlyDelete
     case hideSelectedItems
     case unhideSelectedItems
     case hideDirectoryItems
     case unhideDirectoryItems
+    case openToolboxApplication
+    case translateText
+    case createQRCode
 }

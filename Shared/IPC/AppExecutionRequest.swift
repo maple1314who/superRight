@@ -18,25 +18,35 @@ public enum AppExecutionAction: String, Codable, Equatable, Sendable {
     case applyFileIcon
     case removeCustomIcon
     case showFileInfo
+    case sendShortcutToDesktop
     case copyFileName
     case createFolderFromFileName
     case sendViaAirDrop
     case cutItems
     case openIShot
+    case openIShotAnnotation
+    case openIShotScreenshot
     case convertToICNS
+    case convertToMacIcons
+    case convertToIOSIcons
     case permanentlyDelete
     case hideSelectedItems
     case unhideSelectedItems
     case hideDirectoryItems
     case unhideDirectoryItems
+    case openToolboxApplication
+    case translateText
+    case createQRCode
 
     public var externalApplication: ExternalApplication? {
         switch self {
         case .createFolder, .createFile, .copyToDirectory, .moveToDirectory, .openDirectory,
              .applyFileIcon, .removeCustomIcon, .showFileInfo, .copyFileName,
              .createFolderFromFileName, .sendViaAirDrop, .cutItems, .openIShot,
-             .convertToICNS, .permanentlyDelete, .hideSelectedItems, .unhideSelectedItems,
-             .hideDirectoryItems, .unhideDirectoryItems:
+             .openIShotAnnotation, .openIShotScreenshot, .convertToICNS, .convertToMacIcons,
+             .convertToIOSIcons, .permanentlyDelete, .hideSelectedItems, .unhideSelectedItems,
+             .hideDirectoryItems, .unhideDirectoryItems, .sendShortcutToDesktop,
+             .openToolboxApplication, .translateText, .createQRCode:
             return nil
         case .openTerminal:
             return .terminal

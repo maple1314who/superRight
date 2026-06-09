@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## V3.10.2 - 2026-06-09
+
+### 新增
+- 工具箱默认列表补齐旧版 `arrOfOthers` 功能项，共覆盖 46 个工具入口。
+- 新增“发送快捷方式到桌面”“iShot 截图”“生成 macOS Icons”“生成 iOS Icons”“百度翻译”“Google 翻译”“生成二维码”。
+- 新增一组外部 App 打开入口，未默认启用的编辑器/IDE 可在工具箱中手动开启。
+
+### 改进
+- Finder Extension 会把新增工具箱动作转发到主 App 执行。
+- 主 App 补齐快捷方式、图标集、外部 App 打开、翻译网页和二维码剪贴板执行逻辑。
+- 主 App 与 Finder Extension 版本升级为 `3.10.2 / 2026060920`。
+
+### 验证
+- `swift test`：51 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+
 ## V3.10.1 - 2026-06-09
 
 ### 修复

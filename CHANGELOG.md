@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## V3.9.1 - 2026-06-09
+
+### 新增
+- 发布 Sparkle 测试更新版本，用于从 `3.9.0` 客户端验证在线更新提示。
+
+### 改进
+- 主 App 与 Finder Extension 版本升级为 `3.9.1 / 2026060910`。
+- Release 资产使用 ASCII 文件名 `SuperRight-3.9.1.dmg`，避免 GitHub 对中文资产名做兼容转换。
+
+### 验证
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Release -destination platform=macOS -derivedDataPath build/DerivedData build`：`BUILD SUCCEEDED`。
+- Sparkle Appcast 已生成并包含 `sparkle:edSignature`。
+
 ## V3.9.0 - 2026-06-09
 
 ### 新增

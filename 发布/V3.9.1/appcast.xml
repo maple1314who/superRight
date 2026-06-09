@@ -1,0 +1,15 @@
+<?xml version="1.0" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>右键增强</title>
+        <item>
+            <title>3.9.1</title>
+            <pubDate>Tue, 09 Jun 2026 12:24:49 +0800</pubDate>
+            <sparkle:version>2026060910</sparkle:version>
+            <sparkle:shortVersionString>3.9.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
+            <enclosure url="https://github.com/maple1314who/superRight/releases/latest/download/SuperRight-3.9.1.dmg" length="4084246" type="application/octet-stream" sparkle:edSignature="koDcO6lnATK5PVg8OJsWvv7gqWljSoTkeEAd/iYqkVmATI0k24xEHRHicz8zJo3e4Xb8mXpCH0SqN4e0OOfZBQ=="/>
+        </item>
+    </channel>
+</rss>

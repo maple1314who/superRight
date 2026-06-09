@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## V4.0.11 - 2026-06-09
+
+### 重构
+- 新增主 App `AppExecutionShortcutAdapter`，集中处理发送快捷方式到桌面的桌面路径、冲突命名和符号链接创建。
+- `AppExecutionRequestHandler` 的快捷方式动作改为只负责解析 Finder 选中目标并委托适配器执行。
+- 主 App 与 Finder Extension 版本升级为 `4.0.11 / 2026060935`。
+
+### 验证
+- `swift test`：55 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+- 已安装 `/Applications/右键增强.app`，主 App 和 Finder Extension 均为 `4.0.11 / 2026060935`，插件注册为 `com.maple.right.superright.RightClickFinderExtension(4.0.11)`。
+- 最近 5 分钟未发现 `右键增强` 或 `RightClickFinderExtension` 新崩溃报告。
+
 ## V4.0.10 - 2026-06-09
 
 ### 重构

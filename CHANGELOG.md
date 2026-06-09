@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## V4.0.23 - 2026-06-09
+
+### 重构
+- 新增主 App `AppExecutionTransferAdapter`，集中处理“发送文件到/移动文件到”的业务编排、日志和完成提示音。
+- 传输动作执行前会规范化并去重 Finder 选中路径，降低同一请求内重复路径导致复制出多个重名文件的风险。
+- `AppExecutionRequestHandler` 的传输动作改为只保留策略入口并委托传输适配器。
+- 主 App 与 Finder Extension 版本升级为 `4.0.23 / 2026060947`。
+
+### 验证
+- `swift test`：55 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+- 已安装 `/Applications/右键增强.app`，主 App 和 Finder Extension 均为 `4.0.23 / 2026060947`，插件注册为 `com.maple.right.superright.RightClickFinderExtension(4.0.23)`；最近 5 分钟未发现新崩溃报告。
+
 ## V4.0.22 - 2026-06-09
 
 ### 重构

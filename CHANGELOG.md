@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## V4.0.9 - 2026-06-09
+
+### 重构
+- 新增主 App `AppExecutionWebAdapter`，集中处理翻译 URL 构造和系统浏览器打开逻辑。
+- `AppExecutionRequestHandler` 的翻译动作改为只负责选中文本解析和执行日志记录。
+- 主 App 与 Finder Extension 版本升级为 `4.0.9 / 2026060933`。
+
+### 验证
+- `swift test`：55 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+- 已安装 `/Applications/右键增强.app`，主 App 和 Finder Extension 均为 `4.0.9 / 2026060933`，插件注册为 `com.maple.right.superright.RightClickFinderExtension(4.0.9)`。
+- 最近 5 分钟未发现 `右键增强` 或 `RightClickFinderExtension` 新崩溃报告。
+
 ## V4.0.8 - 2026-06-09
 
 ### 重构

@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## V3.9.2 - 2026-06-09
+
+### 修复
+- 启动后主动执行一次 Sparkle 后台更新检查，避免默认检查周期导致新版本不立即提示。
+- 通用设置新增“检查更新…”按钮，隐藏 Dock 和菜单栏图标后仍可手动触发更新检查。
+
+### 改进
+- 新增 `SharedConstants.appCheckForUpdatesNotification`，让 AppCore 通过进程内通知请求主 App 统一调用 Sparkle。
+- 主 App 与 Finder Extension 版本升级为 `3.9.2 / 2026060911`。
+
+### 验证
+- `swift test`：42 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：`BUILD SUCCEEDED`。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Release -destination platform=macOS -derivedDataPath build/DerivedData build`：`BUILD SUCCEEDED`。
+
 ## V3.9.1 - 2026-06-09
 
 ### 新增

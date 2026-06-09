@@ -66,7 +66,7 @@ private enum AppVersionInfo {
     static let displayName = "右键增强"
 
     static var version: String {
-        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "3.9.1"
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "3.9.2"
     }
 
     static var sidebarTitle: String {
@@ -801,6 +801,19 @@ private struct GeneralSettingsView: View {
 
             Divider()
 
+            SettingsGroup(title: "软件更新") {
+                Text("如果隐藏 Dock 和菜单栏图标，也可以在这里手动检查更新。")
+                    .font(.system(size: 13))
+                    .foregroundStyle(.secondary)
+
+                Button("检查更新…") {
+                    requestCheckForUpdates()
+                }
+                    .buttonStyle(.borderedProminent)
+            }
+
+            Divider()
+
             SettingsGroup(title: "注意事项") {
                 Text("右键增强是一个访达扩展，由系统调度。为了增加稳定性，有时有多个进程是正常的。")
                     .font(.system(size: 13))
@@ -826,6 +839,14 @@ private struct GeneralSettingsView: View {
 
     private func refreshFullDiskAccessStatus() {
         hasFullDiskAccess = FullDiskAccessPermission.isGranted
+    }
+
+    private func requestCheckForUpdates() {
+        // AppCore 不直接依赖 Sparkle；检查更新请求通过通知交给主 App 的 AppDelegate。
+        NotificationCenter.default.post(
+            name: Notification.Name(SharedConstants.appCheckForUpdatesNotification),
+            object: nil
+        )
     }
 
     private func openFullDiskAccessSettings() {

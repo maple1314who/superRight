@@ -7,4 +7,5 @@ public enum SharedConstants {
     public static let appExecutionRequestPayloadKey = "payload"
     public static let appExecutionRequestQueueDirectoryName = "app_execution_requests"
     public static let appSettingsDidChangeNotification = "com.superright.app.settings.changed"
+    public static let appCheckForUpdatesNotification = "com.superright.app.checkForUpdates"
 }

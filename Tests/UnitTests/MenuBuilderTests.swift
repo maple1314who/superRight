@@ -31,6 +31,7 @@ final class MenuBuilderTests: XCTestCase {
         XCTAssertTrue(ids.contains("open_terminal"))
         XCTAssertTrue(ids.contains("open_iterm"))
         XCTAssertTrue(ids.contains("open_vscode"))
+        XCTAssertTrue(ids.contains("open_idea"))
         XCTAssertTrue(ids.contains("copy_path"))
         XCTAssertFalse(ids.contains("open_cursor"))
         XCTAssertFalse(ids.contains("new_markdown"))
@@ -54,6 +55,7 @@ final class MenuBuilderTests: XCTestCase {
         let ids = Set(menu.map(\.id))
 
         XCTAssertTrue(ids.contains("open_vscode"))
+        XCTAssertTrue(ids.contains("open_idea"))
         XCTAssertTrue(ids.contains("copy_path"))
         XCTAssertFalse(ids.contains("new_folder"))
         XCTAssertFalse(ids.contains("open_terminal"))
@@ -80,13 +82,14 @@ final class MenuBuilderTests: XCTestCase {
         XCTAssertTrue(ids.contains("open_terminal"))
         XCTAssertTrue(ids.contains("open_iterm"))
         XCTAssertTrue(ids.contains("open_vscode"))
+        XCTAssertTrue(ids.contains("open_idea"))
         XCTAssertTrue(ids.contains("copy_path"))
         XCTAssertFalse(ids.contains("new_json"))
     }
 
     func testUnavailableApplicationIsHiddenWhenConfigured() throws {
         let builder = MenuBuilder(
-            availabilityChecker: MockAvailabilityChecker(unavailableApps: [.iTerm, .vsCode])
+            availabilityChecker: MockAvailabilityChecker(unavailableApps: [.iTerm, .vsCode, .idea])
         )
         let tempDirectory = try TemporaryDirectory()
         defer { tempDirectory.remove() }
@@ -104,6 +107,131 @@ final class MenuBuilderTests: XCTestCase {
 
         XCTAssertFalse(ids.contains("open_iterm"))
         XCTAssertFalse(ids.contains("open_vscode"))
+        XCTAssertFalse(ids.contains("open_idea"))
         XCTAssertTrue(ids.contains("open_terminal"))
+    }
+
+    func testEnabledNewFileTemplatesAreAddedToCreateMenu() throws {
+        let builder = MenuBuilder(
+            availabilityChecker: MockAvailabilityChecker(unavailableApps: [])
+        )
+        let tempDirectory = try TemporaryDirectory()
+        defer { tempDirectory.remove() }
+
+        let context = FinderSelectionContext(
+            selectedItemURLs: [],
+            currentDirectoryURL: tempDirectory.url
+        )
+
+        var configuration = SharedConfiguration.default
+        configuration.newFileTemplates = [
+            NewFileTemplateConfiguration(
+                id: "json",
+                isEnabled: true,
+                title: "JSON",
+                fileExtension: "json",
+                showInMainMenu: false,
+                order: 0,
+                defaultFileName: "Untitled.json",
+                templateContent: "{}\n",
+                systemImageName: "curlybraces",
+                iconColorName: "blue"
+            ),
+            NewFileTemplateConfiguration(
+                id: "disabled",
+                isEnabled: false,
+                title: "Disabled",
+                fileExtension: "disabled",
+                showInMainMenu: false,
+                order: 1,
+                defaultFileName: "Untitled.disabled",
+                systemImageName: "doc",
+                iconColorName: "gray"
+            )
+        ]
+
+        let menu = builder.buildMenu(context: context, configuration: configuration)
+        let jsonItem = try XCTUnwrap(menu.first { $0.id == "new_file_template_json" })
+        let ids = Set(menu.map(\.id))
+
+        XCTAssertEqual(jsonItem.actionType, .createFile)
+        XCTAssertEqual(jsonItem.fileExtension, "json")
+        XCTAssertEqual(jsonItem.defaultFileName, "Untitled.json")
+        XCTAssertEqual(jsonItem.templateContent, "{}\n")
+        XCTAssertFalse(ids.contains("new_file_template_disabled"))
+    }
+
+    func testNewFileTemplatesAreHiddenForFileSelection() throws {
+        let builder = MenuBuilder(
+            availabilityChecker: MockAvailabilityChecker(unavailableApps: [])
+        )
+        let tempDirectory = try TemporaryDirectory()
+        defer { tempDirectory.remove() }
+        let fileURL = tempDirectory.url.appendingPathComponent("sample.txt")
+        try "hello".data(using: .utf8)?.write(to: fileURL)
+
+        let context = FinderSelectionContext(
+            selectedItemURLs: [fileURL],
+            currentDirectoryURL: tempDirectory.url
+        )
+
+        let menu = builder.buildMenu(context: context, configuration: .default)
+        XCTAssertFalse(menu.contains { $0.id.hasPrefix("new_file_template_") })
+    }
+
+    func testSendToDestinationsAreAddedForFileSelection() throws {
+        let builder = MenuBuilder(
+            availabilityChecker: MockAvailabilityChecker(unavailableApps: [])
+        )
+        let tempDirectory = try TemporaryDirectory()
+        defer { tempDirectory.remove() }
+        let destinationDirectory = try TemporaryDirectory()
+        defer { destinationDirectory.remove() }
+        let fileURL = tempDirectory.url.appendingPathComponent("sample.txt")
+        try "hello".data(using: .utf8)?.write(to: fileURL)
+
+        var configuration = SharedConfiguration.default
+        configuration.sendToDestinations = [
+            FileDestinationConfiguration(
+                id: "target",
+                title: "目标",
+                directoryPath: destinationDirectory.url.path,
+                order: 0,
+                systemImageName: "folder.fill",
+                iconColorName: "cyan"
+            )
+        ]
+        configuration.appSettings.enableCopyTo = true
+        configuration.appSettings.enableMoveTo = true
+
+        let context = FinderSelectionContext(
+            selectedItemURLs: [fileURL],
+            currentDirectoryURL: tempDirectory.url
+        )
+
+        let menu = builder.buildMenu(context: context, configuration: configuration)
+        let copyItem = try XCTUnwrap(menu.first { $0.id == "copy_to_target" })
+        let moveItem = try XCTUnwrap(menu.first { $0.id == "move_to_target" })
+
+        XCTAssertEqual(copyItem.actionType, .copyToDirectory)
+        XCTAssertEqual(moveItem.actionType, .moveToDirectory)
+        XCTAssertEqual(copyItem.destinationPath, destinationDirectory.url.path)
+    }
+
+    func testSendToDestinationsAreHiddenForBlankSpace() throws {
+        let builder = MenuBuilder(
+            availabilityChecker: MockAvailabilityChecker(unavailableApps: [])
+        )
+        let tempDirectory = try TemporaryDirectory()
+        defer { tempDirectory.remove() }
+
+        let context = FinderSelectionContext(
+            selectedItemURLs: [],
+            currentDirectoryURL: tempDirectory.url
+        )
+
+        let menu = builder.buildMenu(context: context, configuration: .default)
+        XCTAssertFalse(menu.contains { $0.id.hasPrefix("copy_to_") })
+        XCTAssertFalse(menu.contains { $0.id.hasPrefix("move_to_") })
     }
 }

@@ -10,6 +10,7 @@ public struct MenuDisplayItem: Equatable, Identifiable, Sendable {
     public var fileExtension: String?
     public var defaultFileName: String?
     public var templateContent: String?
+    public var destinationPath: String?
 
     public init(
         id: String,
@@ -20,7 +21,8 @@ public struct MenuDisplayItem: Equatable, Identifiable, Sendable {
         targetApplication: ExternalApplication?,
         fileExtension: String?,
         defaultFileName: String?,
-        templateContent: String?
+        templateContent: String?,
+        destinationPath: String? = nil
     ) {
         self.id = id
         self.title = title
@@ -31,6 +33,7 @@ public struct MenuDisplayItem: Equatable, Identifiable, Sendable {
         self.fileExtension = fileExtension
         self.defaultFileName = defaultFileName
         self.templateContent = templateContent
+        self.destinationPath = destinationPath
     }
 
     public init(configuration: MenuItemConfiguration) {
@@ -43,5 +46,6 @@ public struct MenuDisplayItem: Equatable, Identifiable, Sendable {
         self.fileExtension = configuration.fileExtension
         self.defaultFileName = configuration.defaultFileName
         self.templateContent = configuration.templateContent
+        self.destinationPath = configuration.destinationPath
     }
 }

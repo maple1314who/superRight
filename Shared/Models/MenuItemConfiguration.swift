@@ -10,6 +10,7 @@ public struct MenuItemConfiguration: Codable, Equatable, Identifiable, Sendable 
     public var fileExtension: String?
     public var defaultFileName: String?
     public var templateContent: String?
+    public var destinationPath: String?
     public var requiresInstallationCheck: Bool
 
     public init(
@@ -24,6 +25,7 @@ public struct MenuItemConfiguration: Codable, Equatable, Identifiable, Sendable 
         fileExtension: String? = nil,
         defaultFileName: String? = nil,
         templateContent: String? = nil,
+        destinationPath: String? = nil,
         requiresInstallationCheck: Bool = false
     ) {
         self.id = id
@@ -37,6 +39,7 @@ public struct MenuItemConfiguration: Codable, Equatable, Identifiable, Sendable 
         self.fileExtension = fileExtension
         self.defaultFileName = defaultFileName
         self.templateContent = templateContent
+        self.destinationPath = destinationPath
         self.requiresInstallationCheck = requiresInstallationCheck
     }
 }

@@ -3,6 +3,8 @@ import Shared
 
 public enum ActionDispatchError: Error, Equatable {
     case missingFileNameConfiguration
+    case missingDestinationPath
+    case missingSelectedItems
     case commandFailed(Int32)
     case clipboardWriteFailed
     case invalidDirectory
@@ -61,11 +63,23 @@ public final class ActionDispatcher {
             let opened = try openApplication(.cursor, context: context, configuration: configuration)
             NSLog("ActionDispatcher.execute openCursor target=%@", opened.path)
             return opened
+        case .openIdea:
+            let opened = try openApplication(.idea, context: context, configuration: configuration)
+            NSLog("ActionDispatcher.execute openIdea target=%@", opened.path)
+            return opened
         case .copyPath:
             let targetURL = targetURLForCopy(context: context)
             try clipboardWriter.copy(text: targetURL.path)
             NSLog("ActionDispatcher.execute copyPath target=%@", targetURL.path)
             return targetURL
+        case .copyToDirectory:
+            let destinationURL = try transferSelectedItems(item: item, context: context, shouldMove: false)
+            NSLog("ActionDispatcher.execute copyToDirectory destination=%@", destinationURL.path)
+            return destinationURL
+        case .moveToDirectory:
+            let destinationURL = try transferSelectedItems(item: item, context: context, shouldMove: true)
+            NSLog("ActionDispatcher.execute moveToDirectory destination=%@", destinationURL.path)
+            return destinationURL
         }
     }
 
@@ -164,6 +178,49 @@ public final class ActionDispatcher {
         context.primarySelectedURL ?? context.currentDirectoryURL
     }
 
+    private func transferSelectedItems(
+        item: MenuDisplayItem,
+        context: FinderSelectionContext,
+        shouldMove: Bool
+    ) throws -> URL {
+        guard let destinationPath = item.destinationPath,
+              !destinationPath.isEmpty else {
+            throw ActionDispatchError.missingDestinationPath
+        }
+        guard !context.selectedItemURLs.isEmpty else {
+            throw ActionDispatchError.missingSelectedItems
+        }
+
+        let destinationDirectoryURL = URL(fileURLWithPath: destinationPath, isDirectory: true)
+        try withSecurityScopedAccess(to: destinationDirectoryURL) {
+            try ensureDirectoryExists(destinationDirectoryURL)
+            for sourceURL in context.selectedItemURLs {
+                let destinationURL = availableTransferDestination(
+                    sourceURL: sourceURL,
+                    destinationDirectoryURL: destinationDirectoryURL
+                )
+                if shouldMove {
+                    try fileManager.moveItem(at: sourceURL, to: destinationURL)
+                } else {
+                    try fileManager.copyItem(at: sourceURL, to: destinationURL)
+                }
+            }
+        }
+        return destinationDirectoryURL
+    }
+
+    private func availableTransferDestination(
+        sourceURL: URL,
+        destinationDirectoryURL: URL
+    ) -> URL {
+        FileNameConflictResolver.nextAvailableURL(
+            in: destinationDirectoryURL,
+            baseName: sourceURL.deletingPathExtension().lastPathComponent,
+            pathExtension: sourceURL.pathExtension.isEmpty ? nil : sourceURL.pathExtension,
+            fileManager: fileManager
+        )
+    }
+
     private func targetURLForOpen(
         actionType: ExternalApplication,
         context: FinderSelectionContext
@@ -174,7 +231,7 @@ public final class ActionDispatcher {
                 return selected
             }
             return context.currentDirectoryURL
-        case .vsCode, .cursor:
+        case .vsCode, .cursor, .idea:
             return context.primarySelectedURL ?? context.currentDirectoryURL
         }
     }

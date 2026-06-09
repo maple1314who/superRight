@@ -5,5 +5,8 @@ public enum MenuActionType: String, Codable, Sendable {
     case openITerm
     case openVSCode
     case openCursor
+    case openIdea
     case copyPath
+    case copyToDirectory
+    case moveToDirectory
 }

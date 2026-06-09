@@ -27,7 +27,14 @@ public final class UserDefaultsConfigurationStore: ConfigurationStore {
         }
 
         do {
-            return try decoder.decode(SharedConfiguration.self, from: payload)
+            let decoded = try decoder.decode(SharedConfiguration.self, from: payload)
+            let upgraded = decoded.upgradedWithDefaults()
+
+            if upgraded != decoded {
+                try? save(upgraded)
+            }
+
+            return upgraded
         } catch {
             throw ConfigurationStoreError.decodeFailed
         }

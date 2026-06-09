@@ -120,6 +120,83 @@ final class ActionDispatcherTests: XCTestCase {
         XCTAssertEqual(clipboardWriter.copiedText, fileURL.path)
     }
 
+    func testCopyToDirectoryCopiesSelectedFileWithConflictNaming() throws {
+        let dispatcher = ActionDispatcher(
+            commandRunner: MockCommandRunner(),
+            clipboardWriter: MockClipboardWriter()
+        )
+        let sourceDirectory = try TemporaryDirectory()
+        defer { sourceDirectory.remove() }
+        let destinationDirectory = try TemporaryDirectory()
+        defer { destinationDirectory.remove() }
+        let sourceURL = sourceDirectory.url.appendingPathComponent("sample.txt")
+        let existingURL = destinationDirectory.url.appendingPathComponent("sample.txt")
+        try "source".data(using: .utf8)?.write(to: sourceURL)
+        try "existing".data(using: .utf8)?.write(to: existingURL)
+
+        let context = FinderSelectionContext(
+            selectedItemURLs: [sourceURL],
+            currentDirectoryURL: sourceDirectory.url
+        )
+        let item = MenuDisplayItem(
+            id: "copy_to_target",
+            title: "复制到目标",
+            order: 0,
+            group: .tool,
+            actionType: .copyToDirectory,
+            targetApplication: nil,
+            fileExtension: nil,
+            defaultFileName: nil,
+            templateContent: nil,
+            destinationPath: destinationDirectory.url.path
+        )
+
+        let resultURL = try dispatcher.execute(item: item, context: context, configuration: .default)
+
+        XCTAssertEqual(resultURL?.path, destinationDirectory.url.path)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: sourceURL.path))
+        XCTAssertEqual(
+            try String(contentsOf: destinationDirectory.url.appendingPathComponent("sample 2.txt"), encoding: .utf8),
+            "source"
+        )
+    }
+
+    func testMoveToDirectoryMovesSelectedFile() throws {
+        let dispatcher = ActionDispatcher(
+            commandRunner: MockCommandRunner(),
+            clipboardWriter: MockClipboardWriter()
+        )
+        let sourceDirectory = try TemporaryDirectory()
+        defer { sourceDirectory.remove() }
+        let destinationDirectory = try TemporaryDirectory()
+        defer { destinationDirectory.remove() }
+        let sourceURL = sourceDirectory.url.appendingPathComponent("sample.txt")
+        try "source".data(using: .utf8)?.write(to: sourceURL)
+
+        let context = FinderSelectionContext(
+            selectedItemURLs: [sourceURL],
+            currentDirectoryURL: sourceDirectory.url
+        )
+        let item = MenuDisplayItem(
+            id: "move_to_target",
+            title: "移动到目标",
+            order: 0,
+            group: .tool,
+            actionType: .moveToDirectory,
+            targetApplication: nil,
+            fileExtension: nil,
+            defaultFileName: nil,
+            templateContent: nil,
+            destinationPath: destinationDirectory.url.path
+        )
+
+        let resultURL = try dispatcher.execute(item: item, context: context, configuration: .default)
+
+        XCTAssertEqual(resultURL?.path, destinationDirectory.url.path)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: sourceURL.path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: destinationDirectory.url.appendingPathComponent("sample.txt").path))
+    }
+
     func testOpenTerminalUsesConfiguredPathWhenInstalled() throws {
         let commandRunner = MockCommandRunner()
         let dispatcher = ActionDispatcher(
@@ -152,6 +229,41 @@ final class ActionDispatcherTests: XCTestCase {
         XCTAssertEqual(
             commandRunner.invocations.first?.arguments,
             ["-a", mockTerminalPath.path, selectedFolder.path]
+        )
+    }
+
+    func testOpenIdeaUsesConfiguredPathWhenInstalled() throws {
+        let commandRunner = MockCommandRunner()
+        let dispatcher = ActionDispatcher(
+            commandRunner: commandRunner,
+            clipboardWriter: MockClipboardWriter()
+        )
+
+        let temporaryDirectory = try TemporaryDirectory()
+        defer { temporaryDirectory.remove() }
+        let selectedFolder = temporaryDirectory.url.appendingPathComponent("Workspace")
+        try FileManager.default.createDirectory(at: selectedFolder, withIntermediateDirectories: true)
+
+        let mockIdeaPath = temporaryDirectory.url.appendingPathComponent("IntelliJ IDEA.app")
+        try FileManager.default.createDirectory(at: mockIdeaPath, withIntermediateDirectories: true)
+
+        var configuration = SharedConfiguration.default
+        configuration.applicationPaths[.idea] = mockIdeaPath.path
+
+        let context = FinderSelectionContext(
+            selectedItemURLs: [selectedFolder],
+            currentDirectoryURL: temporaryDirectory.url
+        )
+        let item = MenuDisplayItem(
+            configuration: configuration.menuItems.first { $0.id == "open_idea" }!
+        )
+
+        _ = try dispatcher.execute(item: item, context: context, configuration: configuration)
+
+        XCTAssertEqual(commandRunner.invocations.count, 1)
+        XCTAssertEqual(
+            commandRunner.invocations.first?.arguments,
+            ["-a", mockIdeaPath.path, selectedFolder.path]
         )
     }
 }

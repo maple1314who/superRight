@@ -2,15 +2,46 @@ public struct SharedConfiguration: Codable, Equatable, Sendable {
     public var menuItems: [MenuItemConfiguration]
     public var appSettings: AppSettings
     public var applicationPaths: [ExternalApplication: String]
+    public var newFileTemplates: [NewFileTemplateConfiguration]
+    public var sendToDestinations: [FileDestinationConfiguration]
 
     public init(
         menuItems: [MenuItemConfiguration],
         appSettings: AppSettings,
-        applicationPaths: [ExternalApplication: String]
+        applicationPaths: [ExternalApplication: String],
+        newFileTemplates: [NewFileTemplateConfiguration] = NewFileTemplateConfiguration.defaultTemplates,
+        sendToDestinations: [FileDestinationConfiguration] = FileDestinationConfiguration.defaultSendDestinations
     ) {
         self.menuItems = menuItems
         self.appSettings = appSettings
         self.applicationPaths = applicationPaths
+        self.newFileTemplates = newFileTemplates
+        self.sendToDestinations = sendToDestinations
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case menuItems
+        case appSettings
+        case applicationPaths
+        case newFileTemplates
+        case sendToDestinations
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.menuItems = try container.decodeIfPresent([MenuItemConfiguration].self, forKey: .menuItems)
+            ?? SharedConfiguration.default.menuItems
+        self.appSettings = try container.decodeIfPresent(AppSettings.self, forKey: .appSettings) ?? .default
+        self.applicationPaths = try container.decodeIfPresent([ExternalApplication: String].self, forKey: .applicationPaths)
+            ?? SharedConfiguration.default.applicationPaths
+        self.newFileTemplates = try container.decodeIfPresent(
+            [NewFileTemplateConfiguration].self,
+            forKey: .newFileTemplates
+        ) ?? NewFileTemplateConfiguration.defaultTemplates
+        self.sendToDestinations = try container.decodeIfPresent(
+            [FileDestinationConfiguration].self,
+            forKey: .sendToDestinations
+        ) ?? FileDestinationConfiguration.defaultSendDestinations
     }
 
     public mutating func normalizeOrder() {
@@ -22,10 +53,83 @@ public struct SharedConfiguration: Codable, Equatable, Sendable {
                 next.order = index
                 return next
             }
+        newFileTemplates = newFileTemplates
+            .sorted { $0.order < $1.order }
+            .enumerated()
+            .map { index, template in
+                var next = template
+                next.order = index
+                return next
+            }
+        sendToDestinations = sendToDestinations
+            .sorted { $0.order < $1.order }
+            .enumerated()
+            .map { index, destination in
+                var next = destination
+                next.order = index
+                return next
+            }
     }
 
     public func sortedMenuItems() -> [MenuItemConfiguration] {
         menuItems.sorted { $0.order < $1.order }
+    }
+
+    public func sortedNewFileTemplates() -> [NewFileTemplateConfiguration] {
+        newFileTemplates.sorted { $0.order < $1.order }
+    }
+
+    public func sortedSendToDestinations() -> [FileDestinationConfiguration] {
+        sendToDestinations.sorted { $0.order < $1.order }
+    }
+
+    public func upgradedWithDefaults() -> SharedConfiguration {
+        var upgraded = self
+        let defaultConfiguration = SharedConfiguration.default
+
+        let existingMenuItemIDs = Set(upgraded.menuItems.map(\.id))
+        let missingMenuItems = defaultConfiguration.menuItems.filter { !existingMenuItemIDs.contains($0.id) }
+        if !missingMenuItems.isEmpty {
+            var nextOrder = (upgraded.menuItems.map(\.order).max() ?? -1) + 1
+            for item in missingMenuItems {
+                var appended = item
+                appended.order = nextOrder
+                nextOrder += 1
+                upgraded.menuItems.append(appended)
+            }
+        }
+
+        for application in ExternalApplication.allCases where upgraded.applicationPaths[application] == nil {
+            upgraded.applicationPaths[application] =
+                defaultConfiguration.applicationPaths[application] ?? application.defaultBundlePath
+        }
+
+        let existingTemplateIDs = Set(upgraded.newFileTemplates.map(\.id))
+        let missingTemplates = defaultConfiguration.newFileTemplates.filter { !existingTemplateIDs.contains($0.id) }
+        if !missingTemplates.isEmpty {
+            var nextOrder = (upgraded.newFileTemplates.map(\.order).max() ?? -1) + 1
+            for template in missingTemplates {
+                var appended = template
+                appended.order = nextOrder
+                nextOrder += 1
+                upgraded.newFileTemplates.append(appended)
+            }
+        }
+
+        let existingDestinationIDs = Set(upgraded.sendToDestinations.map(\.id))
+        let missingDestinations = defaultConfiguration.sendToDestinations.filter { !existingDestinationIDs.contains($0.id) }
+        if !missingDestinations.isEmpty {
+            var nextOrder = (upgraded.sendToDestinations.map(\.order).max() ?? -1) + 1
+            for destination in missingDestinations {
+                var appended = destination
+                appended.order = nextOrder
+                nextOrder += 1
+                upgraded.sendToDestinations.append(appended)
+            }
+        }
+
+        upgraded.normalizeOrder()
+        return upgraded
     }
 
     public static let `default` = SharedConfiguration(
@@ -73,10 +177,21 @@ public struct SharedConfiguration: Codable, Equatable, Sendable {
                 requiresInstallationCheck: true
             ),
             MenuItemConfiguration(
+                id: "open_idea",
+                title: "用 IDEA 打开",
+                isEnabled: true,
+                order: 4,
+                group: .open,
+                visibility: SceneVisibility(blankSpace: true, file: true, folder: true),
+                actionType: .openIdea,
+                targetApplication: .idea,
+                requiresInstallationCheck: true
+            ),
+            MenuItemConfiguration(
                 id: "copy_path",
                 title: "复制路径",
                 isEnabled: true,
-                order: 4,
+                order: 5,
                 group: .tool,
                 visibility: SceneVisibility(blankSpace: true, file: true, folder: true),
                 actionType: .copyPath
@@ -87,7 +202,10 @@ public struct SharedConfiguration: Codable, Equatable, Sendable {
             .terminal: ExternalApplication.terminal.defaultBundlePath,
             .iTerm: ExternalApplication.iTerm.defaultBundlePath,
             .vsCode: ExternalApplication.vsCode.defaultBundlePath,
-            .cursor: ExternalApplication.cursor.defaultBundlePath
-        ]
+            .cursor: ExternalApplication.cursor.defaultBundlePath,
+            .idea: ExternalApplication.idea.defaultBundlePath
+        ],
+        newFileTemplates: NewFileTemplateConfiguration.defaultTemplates,
+        sendToDestinations: FileDestinationConfiguration.defaultSendDestinations
     )
 }

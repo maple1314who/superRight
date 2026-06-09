@@ -17,6 +17,18 @@ public final class MenuManagementViewModel: ObservableObject {
         configuration.sortedMenuItems()
     }
 
+    public var monitoredDirectoryPaths: [String] {
+        configuration.appSettings.monitoredDirectoryPaths
+    }
+
+    public var sortedNewFileTemplates: [NewFileTemplateConfiguration] {
+        configuration.sortedNewFileTemplates()
+    }
+
+    public var sortedSendToDestinations: [FileDestinationConfiguration] {
+        configuration.sortedSendToDestinations()
+    }
+
     public func menuItems(in group: MenuGroup) -> [MenuItemConfiguration] {
         sortedMenuItems.filter { $0.group == group }
     }
@@ -95,8 +107,153 @@ public final class MenuManagementViewModel: ObservableObject {
         persistIfPossible()
     }
 
+    public func updateAppSettingHideMenuBarIcon(_ enabled: Bool) {
+        configuration.appSettings.hideMenuBarIcon = enabled
+        persistIfPossible()
+        NotificationCenter.default.post(
+            name: Notification.Name(SharedConstants.appSettingsDidChangeNotification),
+            object: nil
+        )
+    }
+
+    public func updateShowNewFileIcons(_ enabled: Bool) {
+        configuration.appSettings.showNewFileIcons = enabled
+        persistIfPossible()
+    }
+
+    public func updateOpenNewFileAfterCreate(_ enabled: Bool) {
+        configuration.appSettings.openNewFileAfterCreate = enabled
+        persistIfPossible()
+    }
+
+    public func updatePlaySoundAfterCreate(_ enabled: Bool) {
+        configuration.appSettings.playSoundAfterCreate = enabled
+        persistIfPossible()
+    }
+
+    public func updateShowSendToIcons(_ enabled: Bool) {
+        configuration.appSettings.showSendToIcons = enabled
+        persistIfPossible()
+    }
+
+    public func updateEnableCopyTo(_ enabled: Bool) {
+        configuration.appSettings.enableCopyTo = enabled
+        persistIfPossible()
+    }
+
+    public func updateEnableMoveTo(_ enabled: Bool) {
+        configuration.appSettings.enableMoveTo = enabled
+        persistIfPossible()
+    }
+
+    public func updateNewFileTemplate(_ template: NewFileTemplateConfiguration) {
+        guard let index = configuration.newFileTemplates.firstIndex(where: { $0.id == template.id }) else {
+            return
+        }
+        configuration.newFileTemplates[index] = template
+        configuration.normalizeOrder()
+        persistIfPossible()
+    }
+
+    public func addNewFileTemplate() {
+        let nextIndex = (configuration.newFileTemplates.map(\.order).max() ?? -1) + 1
+        let nextID = "custom_\(UUID().uuidString)"
+        let template = NewFileTemplateConfiguration(
+            id: nextID,
+            isEnabled: true,
+            title: "新模板",
+            fileExtension: "txt",
+            showInMainMenu: false,
+            order: nextIndex,
+            defaultFileName: "Untitled.txt",
+            systemImageName: "doc",
+            iconColorName: "gray"
+        )
+        configuration.newFileTemplates.append(template)
+        configuration.normalizeOrder()
+        persistIfPossible()
+    }
+
+    public func removeNewFileTemplate(id: String) {
+        configuration.newFileTemplates.removeAll { $0.id == id }
+        if configuration.newFileTemplates.isEmpty {
+            configuration.newFileTemplates = NewFileTemplateConfiguration.defaultTemplates
+        }
+        configuration.normalizeOrder()
+        persistIfPossible()
+    }
+
+    public func resetNewFileTemplates() {
+        configuration.newFileTemplates = NewFileTemplateConfiguration.defaultTemplates
+        persistIfPossible()
+    }
+
+    public func updateSendToDestination(_ destination: FileDestinationConfiguration) {
+        guard let index = configuration.sendToDestinations.firstIndex(where: { $0.id == destination.id }) else {
+            return
+        }
+        configuration.sendToDestinations[index] = destination
+        configuration.normalizeOrder()
+        persistIfPossible()
+    }
+
+    public func addSendToDestination() {
+        let nextIndex = (configuration.sendToDestinations.map(\.order).max() ?? -1) + 1
+        let destination = FileDestinationConfiguration(
+            id: "custom_\(UUID().uuidString)",
+            title: "新目录",
+            directoryPath: NSHomeDirectory(),
+            order: nextIndex,
+            systemImageName: "folder.fill",
+            iconColorName: "cyan"
+        )
+        configuration.sendToDestinations.append(destination)
+        configuration.normalizeOrder()
+        persistIfPossible()
+    }
+
+    public func removeLastSendToDestination() {
+        guard !configuration.sendToDestinations.isEmpty else {
+            return
+        }
+        configuration.sendToDestinations.sort { $0.order < $1.order }
+        configuration.sendToDestinations.removeLast()
+        if configuration.sendToDestinations.isEmpty {
+            configuration.sendToDestinations = FileDestinationConfiguration.defaultSendDestinations
+        }
+        configuration.normalizeOrder()
+        persistIfPossible()
+    }
+
+    public func resetSendToDestinations() {
+        configuration.sendToDestinations = FileDestinationConfiguration.defaultSendDestinations
+        persistIfPossible()
+    }
+
     public func setApplicationPath(_ path: String, for application: ExternalApplication) {
         configuration.applicationPaths[application] = path
+        persistIfPossible()
+    }
+
+    public func addMonitoredDirectory(path: String) {
+        let normalizedPath = normalizePath(path)
+        guard !normalizedPath.isEmpty else {
+            return
+        }
+
+        guard !configuration.appSettings.monitoredDirectoryPaths.contains(normalizedPath) else {
+            return
+        }
+
+        configuration.appSettings.monitoredDirectoryPaths.append(normalizedPath)
+        persistIfPossible()
+    }
+
+    public func removeMonitoredDirectories(atOffsets offsets: IndexSet) {
+        configuration.appSettings.monitoredDirectoryPaths.remove(atOffsets: offsets)
+        if configuration.appSettings.monitoredDirectoryPaths.isEmpty {
+            configuration.appSettings.monitoredDirectoryPaths = [defaultDesktopPath()]
+        }
         persistIfPossible()
     }
 
@@ -138,5 +295,21 @@ public final class MenuManagementViewModel: ObservableObject {
               items.count,
               status
         )
+        let directories = configuration.appSettings.monitoredDirectoryPaths.joined(separator: " | ")
+        NSLog("%@ monitoredDirectories.count=%ld paths=[%@]",
+              prefix,
+              configuration.appSettings.monitoredDirectoryPaths.count,
+              directories
+        )
+    }
+
+    private func normalizePath(_ path: String) -> String {
+        URL(fileURLWithPath: (path as NSString).expandingTildeInPath, isDirectory: true)
+            .standardizedFileURL
+            .path
+    }
+
+    private func defaultDesktopPath() -> String {
+        NSHomeDirectory().appending("/Desktop")
     }
 }

@@ -20,6 +20,7 @@
 - `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
 - `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Release -destination platform=macOS -derivedDataPath build/PackageRelease build`：BUILD SUCCEEDED。
 - 已确认 Release App 元数据包含 `CFBundleDevelopmentRegion=zh_CN`、`CFBundleAllowMixedLocalizations=true` 和 `zh_CN/zh_TW/zh_HK/en` 本地化列表；Sparkle 框架内存在 `zh_CN.lproj/Sparkle.strings`。
+- 已验证 GitHub Release：`https://github.com/maple1314who/superRight/releases/latest/download/appcast.xml` 与 `https://github.com/maple1314who/superRight/releases/latest/download/SuperRight-4.0.31.dmg` 均返回 `200`，远端 DMG SHA256 为 `5e7e09cb5b787efab55e22f06ef0f65b7caf15cc8244af2b83d0c04261b1626f`。
 
 ## V4.0.30 - 2026-06-09
 

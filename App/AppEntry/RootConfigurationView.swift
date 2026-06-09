@@ -64,6 +64,18 @@ public struct RootConfigurationView: View {
     RootConfigurationView(store: InMemoryConfigurationStore())
 }
 
+private enum AppVersionInfo {
+    static let displayName = "右键增强"
+
+    static var version: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "3.3.0"
+    }
+
+    static var sidebarTitle: String {
+        "\(displayName) \(version)"
+    }
+}
+
 private enum SidebarSection: String, Identifiable {
     case newFile = "新建文件"
     case sendTo = "发送文件到..."
@@ -141,7 +153,7 @@ private struct SidebarView: View {
                         )
                 }
 
-                Text("超级右键 2.2.3")
+                Text(AppVersionInfo.sidebarTitle)
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(.white)
 
@@ -725,7 +737,7 @@ private struct GeneralSettingsView: View {
             Divider()
 
             SettingsGroup(title: "注意事项") {
-                Text("超级右键是一个访达扩展，由系统调度。为了增加稳定性，有时有多个进程是正常的。")
+                Text("右键增强是一个访达扩展，由系统调度。为了增加稳定性，有时有多个进程是正常的。")
                     .font(.system(size: 13))
                     .foregroundStyle(.secondary)
             }

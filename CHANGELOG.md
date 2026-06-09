@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## V3.3.0 - 2026-06-09
+
+### 改进
+- 应用内展示名称统一为“右键增强”。
+- 侧边栏版本号改为读取 App Bundle 的 `CFBundleShortVersionString`，避免 UI 版本与实际包版本不一致。
+- 主 App 与 Finder Extension 的真实版本统一为 `3.3.0 / 2026060903`。
+
+### 文档
+- 新增模块说明文档，明确每个模块职责、关键文件、维护规则和功能接入流程。
+- 新增版本管理说明，明确 `MARKETING_VERSION`、`CURRENT_PROJECT_VERSION` 和发版记录同步规则。
+
+### 验证
+- `swift test`：31 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：`BUILD SUCCEEDED`。
+- 生成包 `Info.plist` 已确认：`CFBundleDisplayName = 右键增强`，`CFBundleShortVersionString = 3.3.0`，`CFBundleVersion = 2026060903`。
+
 ## V3.2.0 - 2026-06-09
 
 ### 新增
@@ -21,7 +37,7 @@
 - 新增 App 图标资源。
 
 ### 改进
-- 配置界面重构为接近“超级右键 2.2.3”的侧边栏布局。
+- 配置界面重构为侧边栏布局，接近目标参考 UI。
 - 通用设置中的“隐藏状态栏图标”升级为“隐藏 Dock 和菜单栏图标”。
 - 主 App 启动和激活时会刷新完全磁盘访问权限状态。
 - Finder Extension 对写文件类动作统一转发给主 App 执行，提高权限稳定性。

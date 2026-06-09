@@ -7,6 +7,7 @@
 - “显示简介、复制路径、复制名称、剪切、隔空投送”提升到根菜单，减少进入“工具”子菜单的层级。
 - “复制到/移动到/发送快捷方式到桌面”归入“发送到”，“常用目录”归入“打开”，“文件图标预设/还原图标”归入“图标”。
 - 避免内置“复制路径”和工具箱“复制路径”同时出现；旧配置缺少主菜单展示字段时会自动迁移默认展示偏好。
+- 新增本地安装脚本，安装调试构建时会注销 Release 构建目录和 Xcode DerivedData 里的重复 Finder Extension，只保留 `/Applications/右键增强.app`。
 
 ### 验证
 - `swift test --filter MenuBuilderTests`：19 tests, 0 failures。
@@ -14,6 +15,7 @@
 - `swift test`：58 tests, 0 failures。
 - `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
 - 本机已安装 Debug 构建到 `/Applications/右键增强.app`，Finder Extension 已重新注册为 `com.maple.right.superright.RightClickFinderExtension(4.0.32)`。
+- `bash -n Scripts/install-local-app.sh`：通过。
 
 ## V4.0.32 - 2026-06-09
 

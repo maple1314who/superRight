@@ -297,6 +297,30 @@ public final class MenuManagementViewModel: ObservableObject {
         persistIfPossible()
     }
 
+    /// 调整“发送文件到”目标目录顺序。
+    ///
+    /// 发送目标在配置界面只允许点击选择和拖拽排序，路径与名称由添加目录时生成；
+    /// 排序统一在 ViewModel 中重新编号，保证 Finder 右键菜单读取到稳定顺序。
+    public func moveSendToDestination(draggedID: String, targetID: String) {
+        guard draggedID != targetID else {
+            return
+        }
+
+        var orderedDestinations = configuration.sortedSendToDestinations()
+        guard let sourceIndex = orderedDestinations.firstIndex(where: { $0.id == draggedID }),
+              let targetIndex = orderedDestinations.firstIndex(where: { $0.id == targetID }) else {
+            return
+        }
+
+        let movingDestination = orderedDestinations.remove(at: sourceIndex)
+        orderedDestinations.insert(movingDestination, at: targetIndex)
+        for index in orderedDestinations.indices {
+            orderedDestinations[index].order = index
+        }
+        configuration.sendToDestinations = orderedDestinations
+        persistIfPossible()
+    }
+
     @discardableResult
     public func addSendToDestination(directoryURL: URL? = nil) -> String {
         let nextIndex = (configuration.sendToDestinations.map(\.order).max() ?? -1) + 1

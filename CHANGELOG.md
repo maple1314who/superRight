@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## V3.9.8 - 2026-06-09
+
+### 修复
+- 移除主窗口顶部独立标题栏占位，让系统窗口按钮浮在左侧栏顶部。
+- “发送文件到...”列表行改为只读点击选择，避免误触进入编辑。
+- “发送文件到...”列表接入稳定拖拽排序，并持久化排序结果。
+
+### 改进
+- 发送目标排序由 `MenuManagementViewModel` 统一重排并重新编号。
+- 主 App 与 Finder Extension 版本升级为 `3.9.8 / 2026060916`。
+
+### 验证
+- `swift test`：50 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+
 ## V3.9.7 - 2026-06-09
 
 ### 修复

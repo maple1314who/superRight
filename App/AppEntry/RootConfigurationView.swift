@@ -349,7 +349,8 @@ private struct SendToSettingsView: View {
                 viewModel: viewModel,
                 showIcons: viewModel.configuration.appSettings.showSendToIcons,
                 emptyRowCount: 12,
-                selectedDestinationID: $selectedDestinationID
+                selectedDestinationID: $selectedDestinationID,
+                moveDestination: viewModel.moveSendToDestination
             )
             .padding(.horizontal, 20)
             .padding(.top, 45)
@@ -442,13 +443,16 @@ private struct SendToDestinationTableView: View {
     let showIcons: Bool
     let emptyRowCount: Int
     @Binding var selectedDestinationID: String?
+    let moveDestination: (String, String) -> Void
+    @State private var draggingDestinationID: String?
+    @State private var pendingDropTargetID: String?
 
     var body: some View {
         SettingsTableFrame {
             HStack(spacing: 0) {
                 HeaderCell("图标", width: 60)
                 HeaderCell("真实路径", alignment: .leading)
-                HeaderCell("显示名称（点击编辑/按住拖拽）", alignment: .leading)
+                HeaderCell("显示名称（点击选择/按住拖拽）", alignment: .leading)
             }
         } rows: {
             ForEach(viewModel.sortedSendToDestinations.indices, id: \.self) { index in
@@ -458,8 +462,22 @@ private struct SendToDestinationTableView: View {
                     showIcon: showIcons,
                     isOdd: index % 2 == 1,
                     isSelected: selectedDestinationID == destination.id,
-                    select: { selectedDestinationID = destination.id },
-                    update: viewModel.updateSendToDestination
+                    select: { selectedDestinationID = destination.id }
+                )
+                .opacity(draggingDestinationID == destination.id ? 0.55 : 1)
+                .onDrag {
+                    draggingDestinationID = destination.id
+                    pendingDropTargetID = nil
+                    return NSItemProvider(object: destination.id as NSString)
+                }
+                .onDrop(
+                    of: [UTType.text],
+                    delegate: StableReorderDropDelegate(
+                        targetID: destination.id,
+                        draggingID: $draggingDestinationID,
+                        pendingTargetID: $pendingDropTargetID,
+                        move: moveDestination
+                    )
                 )
             }
 
@@ -474,7 +492,6 @@ private struct SendToDestinationRowView: View {
     let isOdd: Bool
     let isSelected: Bool
     let select: () -> Void
-    let update: (FileDestinationConfiguration) -> Void
 
     var body: some View {
         HStack(spacing: 0) {
@@ -488,29 +505,19 @@ private struct SendToDestinationRowView: View {
             }
             .frame(width: 60)
 
-            TextField(
-                "",
-                text: Binding(
-                    get: { destination.directoryPath },
-                    set: { update(\.directoryPath, value: $0) }
-                )
-            )
-            .textFieldStyle(.plain)
-            .font(.system(size: 13))
-            .padding(.horizontal, 8)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            Text(destination.directoryPath)
+                .lineLimit(1)
+                .truncationMode(.middle)
+                .font(.system(size: 13))
+                .padding(.horizontal, 8)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-            TextField(
-                "",
-                text: Binding(
-                    get: { destination.title },
-                    set: { update(\.title, value: $0) }
-                )
-            )
-            .textFieldStyle(.plain)
-            .font(.system(size: 13))
-            .padding(.horizontal, 8)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            Text(destination.title)
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .font(.system(size: 13))
+                .padding(.horizontal, 8)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
         .frame(height: 32)
         .contentShape(Rectangle())
@@ -525,11 +532,6 @@ private struct SendToDestinationRowView: View {
         return isOdd ? Color.black.opacity(0.035) : Color.white
     }
 
-    private func update<Value>(_ keyPath: WritableKeyPath<FileDestinationConfiguration, Value>, value: Value) {
-        var updated = destination
-        updated[keyPath: keyPath] = value
-        update(updated)
-    }
 }
 
 private struct FavoriteDirectoriesView: View {

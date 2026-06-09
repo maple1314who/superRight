@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## V4.0.19 - 2026-06-09
+
+### 重构
+- 新增主 App `AppExecutionLogFileAdapter`，集中处理执行日志文件路径解析、文件创建和追加写入。
+- `AppExecutionRequestHandler` 的日志入口保留 `NSLog` 和适配器调用，移除内联文件写入细节。
+- 主 App 与 Finder Extension 版本升级为 `4.0.19 / 2026060943`。
+
+### 验证
+- `swift test`：55 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+- 已安装 `/Applications/右键增强.app`，主 App 和 Finder Extension 均为 `4.0.19 / 2026060943`，插件注册为 `com.maple.right.superright.RightClickFinderExtension(4.0.19)`；最近 5 分钟未发现新崩溃报告。
+
 ## V4.0.18 - 2026-06-09
 
 ### 重构

@@ -11,6 +11,7 @@
 - 补充核心模块源码注释，覆盖 Shared、ExtensionCore、AppCore、Finder Extension 和主 App 执行链路。
 - 新增模块说明文档，明确每个模块职责、关键文件、维护规则和功能接入流程。
 - 新增版本管理说明，明确 `MARKETING_VERSION`、`CURRENT_PROJECT_VERSION` 和发版记录同步规则。
+- 新增 Codex 工作流 Skill 文档，固化注释、文档、回归测试、Git 提交和剩余任务汇报流程。
 
 ### 验证
 - `swift test`：31 tests, 0 failures。

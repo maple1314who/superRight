@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## V3.9.7 - 2026-06-09
+
+### 修复
+- 隐藏主窗口标题栏里重复显示的“右键增强”文字，避免和左侧栏品牌区重复。
+- “新建文件”表格支持拖拽排序，拖拽描述和真实行为一致。
+- 文件/文件夹图标表格拖拽改为松手后排序，避免实时重排导致列表抖动。
+
+### 改进
+- 新建文件模板排序由 `MenuManagementViewModel` 统一重排并持久化。
+- 主 App 与 Finder Extension 版本升级为 `3.9.7 / 2026060915`。
+
+### 验证
+- `swift test`：49 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+
 ## V3.9.6 - 2026-06-09
 
 ### 修复

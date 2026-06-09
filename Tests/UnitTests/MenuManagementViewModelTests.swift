@@ -47,6 +47,20 @@ final class MenuManagementViewModelTests: XCTestCase {
         XCTAssertEqual(Set(sorted.map(\.order)), Set(0..<sorted.count))
     }
 
+    func testNewFileTemplateReorderPersists() throws {
+        let store = InMemoryConfigurationStore(configuration: .default)
+        let viewModel = MenuManagementViewModel(store: store)
+        let firstID = viewModel.sortedNewFileTemplates[0].id
+        let fourthID = viewModel.sortedNewFileTemplates[3].id
+
+        viewModel.moveNewFileTemplate(draggedID: firstID, targetID: fourthID)
+
+        let sorted = viewModel.sortedNewFileTemplates
+
+        XCTAssertEqual(sorted[3].id, firstID)
+        XCTAssertEqual(Set(sorted.map(\.order)), Set(0..<sorted.count))
+    }
+
     func testFileIconImageImportAndReorderPersists() throws {
         let store = InMemoryConfigurationStore(configuration: .default)
         let viewModel = MenuManagementViewModel(store: store)

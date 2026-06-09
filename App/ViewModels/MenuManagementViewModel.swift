@@ -203,6 +203,30 @@ public final class MenuManagementViewModel: ObservableObject {
         persistIfPossible()
     }
 
+    /// 调整新建文件模板顺序。
+    ///
+    /// 配置界面拖拽只传递模板 ID，这里统一按 `order` 排序后重排并重新编号，
+    /// 避免视图层直接操作持久化数组导致排序状态不一致。
+    public func moveNewFileTemplate(draggedID: String, targetID: String) {
+        guard draggedID != targetID else {
+            return
+        }
+
+        var orderedTemplates = configuration.sortedNewFileTemplates()
+        guard let sourceIndex = orderedTemplates.firstIndex(where: { $0.id == draggedID }),
+              let targetIndex = orderedTemplates.firstIndex(where: { $0.id == targetID }) else {
+            return
+        }
+
+        let movingTemplate = orderedTemplates.remove(at: sourceIndex)
+        orderedTemplates.insert(movingTemplate, at: targetIndex)
+        for index in orderedTemplates.indices {
+            orderedTemplates[index].order = index
+        }
+        configuration.newFileTemplates = orderedTemplates
+        persistIfPossible()
+    }
+
     public func addNewFileTemplate() {
         let nextIndex = (configuration.newFileTemplates.map(\.order).max() ?? -1) + 1
         let nextID = "custom_\(UUID().uuidString)"

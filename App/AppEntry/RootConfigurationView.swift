@@ -227,7 +227,8 @@ private struct NewFileSettingsView: View {
             NewFileTableView(
                 templates: viewModel.sortedNewFileTemplates,
                 showIcons: viewModel.configuration.appSettings.showNewFileIcons,
-                updateTemplate: viewModel.updateNewFileTemplate
+                updateTemplate: viewModel.updateNewFileTemplate,
+                moveTemplate: viewModel.moveNewFileTemplate
             )
                 .padding(.horizontal, 20)
                 .padding(.top, 45)
@@ -1014,6 +1015,7 @@ private struct FileIconTableView: View {
     let importImage: (String) -> Void
     let clearImage: (FileIconConfiguration) -> Void
     @State private var draggingPresetID: String?
+    @State private var pendingDropTargetID: String?
 
     var body: some View {
         SettingsTableFrame {
@@ -1039,13 +1041,15 @@ private struct FileIconTableView: View {
                 )
                 .onDrag {
                     draggingPresetID = preset.id
+                    pendingDropTargetID = nil
                     return NSItemProvider(object: preset.id as NSString)
                 }
                 .onDrop(
                     of: [UTType.text],
-                    delegate: FileIconPresetDropDelegate(
+                    delegate: StableReorderDropDelegate(
                         targetID: preset.id,
                         draggingID: $draggingPresetID,
+                        pendingTargetID: $pendingDropTargetID,
                         move: move
                     )
                 )
@@ -1054,20 +1058,31 @@ private struct FileIconTableView: View {
     }
 }
 
-private struct FileIconPresetDropDelegate: DropDelegate {
+/// 稳定拖拽排序代理。
+///
+/// 不在 `dropEntered` 中立即移动数组，只记录当前悬停目标并在松手时移动一次。
+/// 这样可避免 SwiftUI 行位置变化后重复触发进入事件，导致列表拖拽时来回抖动。
+private struct StableReorderDropDelegate: DropDelegate {
     let targetID: String
     @Binding var draggingID: String?
+    @Binding var pendingTargetID: String?
     let move: (String, String) -> Void
 
     func dropEntered(info: DropInfo) {
         guard let draggingID, draggingID != targetID else {
             return
         }
-        move(draggingID, targetID)
+        pendingTargetID = targetID
     }
 
     func performDrop(info: DropInfo) -> Bool {
+        if let draggingID,
+           let pendingTargetID,
+           draggingID != pendingTargetID {
+            move(draggingID, pendingTargetID)
+        }
         draggingID = nil
+        pendingTargetID = nil
         return true
     }
 
@@ -1318,6 +1333,9 @@ private struct NewFileTableView: View {
     let templates: [NewFileTemplateConfiguration]
     let showIcons: Bool
     let updateTemplate: (NewFileTemplateConfiguration) -> Void
+    let moveTemplate: (String, String) -> Void
+    @State private var draggingTemplateID: String?
+    @State private var pendingDropTargetID: String?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -1333,6 +1351,21 @@ private struct NewFileTableView: View {
                             showIcon: showIcons,
                             isOdd: index % 2 == 1,
                             updateTemplate: updateTemplate
+                        )
+                        .opacity(draggingTemplateID == template.id ? 0.55 : 1)
+                        .onDrag {
+                            draggingTemplateID = template.id
+                            pendingDropTargetID = nil
+                            return NSItemProvider(object: template.id as NSString)
+                        }
+                        .onDrop(
+                            of: [UTType.text],
+                            delegate: StableReorderDropDelegate(
+                                targetID: template.id,
+                                draggingID: $draggingTemplateID,
+                                pendingTargetID: $pendingDropTargetID,
+                                move: moveTemplate
+                            )
                         )
                     }
                 }

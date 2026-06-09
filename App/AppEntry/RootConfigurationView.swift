@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import UniformTypeIdentifiers
 import Shared
 
 /// 配置界面根视图。
@@ -636,7 +637,10 @@ private struct FileIconSettingsView: View {
             FileIconTableView(
                 presets: viewModel.sortedFileIconPresets,
                 showIcons: viewModel.configuration.appSettings.showFileIconPresetIcons,
-                update: viewModel.updateFileIconPreset
+                update: viewModel.updateFileIconPreset,
+                move: viewModel.moveFileIconPreset,
+                importImage: importIconImage,
+                clearImage: clearIconImage
             )
                 .padding(.horizontal, 20)
                 .padding(.top, 45)
@@ -681,10 +685,6 @@ private struct FileIconSettingsView: View {
                 )
 
                 Spacer()
-
-                Button("更多图标素材>>") {}
-                    .buttonStyle(.plain)
-                    .foregroundStyle(.blue)
             }
             .toggleStyle(.checkbox)
             .font(.system(size: 13))
@@ -693,6 +693,40 @@ private struct FileIconSettingsView: View {
 
             Spacer()
         }
+    }
+
+    private func importIconImage(for presetID: String) {
+        let panel = NSOpenPanel()
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        panel.canChooseFiles = true
+        panel.allowedContentTypes = [.image]
+        panel.prompt = "导入"
+
+        guard panel.runModal() == .OK,
+              let url = panel.url,
+              let image = NSImage(contentsOf: url),
+              let data = try? Data(contentsOf: url) else {
+            return
+        }
+
+        let width = Int(image.size.width.rounded())
+        let height = Int(image.size.height.rounded())
+        viewModel.updateFileIconPresetImage(
+            id: presetID,
+            imageData: data,
+            fileName: url.lastPathComponent,
+            sizeDescription: "\(width) x \(height)"
+        )
+    }
+
+    private func clearIconImage(for preset: FileIconConfiguration) {
+        viewModel.updateFileIconPresetImage(
+            id: preset.id,
+            imageData: nil,
+            fileName: nil,
+            sizeDescription: preset.defaultSizeDescription
+        )
     }
 }
 
@@ -933,6 +967,10 @@ private struct FileIconTableView: View {
     let presets: [FileIconConfiguration]
     let showIcons: Bool
     let update: (FileIconConfiguration) -> Void
+    let move: (String, String) -> Void
+    let importImage: (String) -> Void
+    let clearImage: (FileIconConfiguration) -> Void
+    @State private var draggingPresetID: String?
 
     var body: some View {
         SettingsTableFrame {
@@ -943,6 +981,7 @@ private struct FileIconTableView: View {
                 }
                 HeaderCell("图标", width: 82)
                 HeaderCell("尺寸", width: 128)
+                HeaderCell("来源", width: 148)
                 HeaderCell("显示名称（单击编辑/按住拖拽）", alignment: .leading)
             }
         } rows: {
@@ -951,10 +990,46 @@ private struct FileIconTableView: View {
                     preset: preset,
                     showIcon: showIcons,
                     isOdd: index % 2 == 1,
-                    update: update
+                    update: update,
+                    importImage: importImage,
+                    clearImage: clearImage
+                )
+                .onDrag {
+                    draggingPresetID = preset.id
+                    return NSItemProvider(object: preset.id as NSString)
+                }
+                .onDrop(
+                    of: [UTType.text],
+                    delegate: FileIconPresetDropDelegate(
+                        targetID: preset.id,
+                        draggingID: $draggingPresetID,
+                        move: move
+                    )
                 )
             }
         }
+    }
+}
+
+private struct FileIconPresetDropDelegate: DropDelegate {
+    let targetID: String
+    @Binding var draggingID: String?
+    let move: (String, String) -> Void
+
+    func dropEntered(info: DropInfo) {
+        guard let draggingID, draggingID != targetID else {
+            return
+        }
+        move(draggingID, targetID)
+    }
+
+    func performDrop(info: DropInfo) -> Bool {
+        draggingID = nil
+        return true
+    }
+
+    func dropUpdated(info: DropInfo) -> DropProposal? {
+        DropProposal(operation: .move)
     }
 }
 
@@ -963,6 +1038,8 @@ private struct FileIconPresetRowView: View {
     let showIcon: Bool
     let isOdd: Bool
     let update: (FileIconConfiguration) -> Void
+    let importImage: (String) -> Void
+    let clearImage: (FileIconConfiguration) -> Void
 
     var body: some View {
         HStack(spacing: 0) {
@@ -979,10 +1056,18 @@ private struct FileIconPresetRowView: View {
 
             ZStack {
                 if showIcon {
-                    SmallIconView(
-                        systemImage: preset.systemImageName,
-                        tint: preset.iconTint
-                    )
+                    if let importedIconImage = preset.importedIconImage {
+                        Image(nsImage: importedIconImage)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 22, height: 22)
+                            .clipShape(RoundedRectangle(cornerRadius: 4))
+                    } else {
+                        SmallIconView(
+                            systemImage: preset.systemImageName,
+                            tint: preset.iconTint
+                        )
+                    }
                 }
             }
             .frame(width: 82)
@@ -990,6 +1075,22 @@ private struct FileIconPresetRowView: View {
             Text(preset.sizeDescription)
                 .font(.system(size: 13))
                 .frame(width: 128, alignment: .center)
+
+            HStack(spacing: 6) {
+                Button(preset.importedImageData == nil ? "导入" : "更换") {
+                    importImage(preset.id)
+                }
+                .buttonStyle(.borderless)
+
+                if preset.importedImageData != nil {
+                    Button("清除") {
+                        clearImage(preset)
+                    }
+                    .buttonStyle(.borderless)
+                }
+            }
+            .font(.system(size: 12))
+            .frame(width: 148, alignment: .center)
 
             TextField(
                 "",
@@ -1005,6 +1106,7 @@ private struct FileIconPresetRowView: View {
         }
         .frame(height: 32)
         .background(isOdd ? Color.black.opacity(0.035) : Color.white)
+        .contentShape(Rectangle())
     }
 
     private func update<Value>(_ keyPath: WritableKeyPath<FileIconConfiguration, Value>, value: Value) {
@@ -1424,6 +1526,19 @@ private extension FileDestinationConfiguration {
 }
 
 private extension FileIconConfiguration {
+    var importedIconImage: NSImage? {
+        guard let importedImageData else {
+            return nil
+        }
+        return NSImage(data: importedImageData)
+    }
+
+    var defaultSizeDescription: String {
+        FileIconConfiguration.defaultPresets
+            .first { $0.id == id }?
+            .sizeDescription ?? "128 x 128"
+    }
+
     var iconTint: Color {
         switch iconColorName {
         case "black":

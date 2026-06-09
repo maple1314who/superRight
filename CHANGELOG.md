@@ -7,9 +7,11 @@
 
 ### 新增
 - Finder 右键菜单按“新建 / 打开 / 工具”分组展示为子菜单，不再把所有动作混在扁平列表中。
+- 文件/文件夹图标预设支持导入本地图片，右键设置图标时优先使用导入图片。
+- 文件/文件夹图标预设支持拖拽排序，排序后同步影响配置界面和右键菜单展示顺序。
 
 ### 验证
-- `swift test`：42 tests, 0 failures。
+- `swift test`：43 tests, 0 failures。
 - `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：`BUILD SUCCEEDED`。
 
 ## V3.9.2 - 2026-06-09

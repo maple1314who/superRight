@@ -237,7 +237,8 @@ public struct MenuBuilder {
                 visibility: SceneVisibility(blankSpace: false, file: true, folder: true),
                 actionType: .applyFileIcon,
                 iconSystemImageName: preset.systemImageName,
-                iconColorName: preset.iconColorName
+                iconColorName: preset.iconColorName,
+                importedIconImageData: preset.importedImageData
             )
         }
 

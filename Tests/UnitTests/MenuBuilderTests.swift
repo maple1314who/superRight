@@ -247,6 +247,7 @@ final class MenuBuilderTests: XCTestCase {
         try "hello".data(using: .utf8)?.write(to: fileURL)
 
         var configuration = SharedConfiguration.default
+        let importedImageData = Data([0x01, 0x02, 0x03])
         configuration.fileIconPresets = [
             FileIconConfiguration(
                 id: "blue-doc",
@@ -255,7 +256,9 @@ final class MenuBuilderTests: XCTestCase {
                 order: 0,
                 systemImageName: "doc.fill",
                 iconColorName: "blue",
-                sizeDescription: "128 x 128"
+                sizeDescription: "128 x 128",
+                importedImageData: importedImageData,
+                importedImageFileName: "icon.png"
             ),
             FileIconConfiguration(
                 id: "disabled",
@@ -280,6 +283,7 @@ final class MenuBuilderTests: XCTestCase {
         XCTAssertEqual(applyItem.actionType, .applyFileIcon)
         XCTAssertEqual(applyItem.iconSystemImageName, "doc.fill")
         XCTAssertEqual(applyItem.iconColorName, "blue")
+        XCTAssertEqual(applyItem.importedIconImageData, importedImageData)
         XCTAssertTrue(menu.contains { $0.id == "remove_custom_icon" && $0.actionType == .removeCustomIcon })
         XCTAssertFalse(menu.contains { $0.id == "apply_file_icon_disabled" })
     }

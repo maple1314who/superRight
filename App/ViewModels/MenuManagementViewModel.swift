@@ -5,7 +5,8 @@ import Shared
 /// 配置界面的状态管理入口。
 ///
 /// SwiftUI 视图只通过该 ViewModel 读写共享配置，避免多个页面直接操作
-/// `ConfigurationStore` 导致状态不同步。
+/// `ConfigurationStore` 导致状态不同步。图标导入和排序也在这里统一归一化，
+/// 保证 Finder Extension 读取到的共享配置顺序稳定。
 @MainActor
 public final class MenuManagementViewModel: ObservableObject {
     @Published public private(set) var configuration: SharedConfiguration
@@ -353,6 +354,43 @@ public final class MenuManagementViewModel: ObservableObject {
         }
         configuration.fileIconPresets[index] = preset
         configuration.normalizeOrder()
+        persistIfPossible()
+    }
+
+    public func updateFileIconPresetImage(
+        id: String,
+        imageData: Data?,
+        fileName: String?,
+        sizeDescription: String
+    ) {
+        guard let index = configuration.fileIconPresets.firstIndex(where: { $0.id == id }) else {
+            return
+        }
+        configuration.fileIconPresets[index].importedImageData = imageData
+        configuration.fileIconPresets[index].importedImageFileName = fileName
+        configuration.fileIconPresets[index].sizeDescription = sizeDescription
+        configuration.normalizeOrder()
+        persistIfPossible()
+    }
+
+    public func moveFileIconPreset(draggedID: String, targetID: String) {
+        guard draggedID != targetID else {
+            return
+        }
+
+        var orderedPresets = configuration.sortedFileIconPresets()
+        guard let sourceIndex = orderedPresets.firstIndex(where: { $0.id == draggedID }),
+              let targetIndex = orderedPresets.firstIndex(where: { $0.id == targetID }) else {
+            return
+        }
+
+        let movingPreset = orderedPresets.remove(at: sourceIndex)
+        let insertionIndex = targetIndex > sourceIndex ? targetIndex : targetIndex
+        orderedPresets.insert(movingPreset, at: insertionIndex)
+        for index in orderedPresets.indices {
+            orderedPresets[index].order = index
+        }
+        configuration.fileIconPresets = orderedPresets
         persistIfPossible()
     }
 

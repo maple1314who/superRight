@@ -87,6 +87,7 @@ final class AppExecutionRequestTests: XCTestCase {
     }
 
     func testRequestRoundTripPreservesFileIconFields() throws {
+        let iconImageData = Data([0x89, 0x50, 0x4E, 0x47])
         let request = AppExecutionRequest(
             requestID: "request-3",
             action: .applyFileIcon,
@@ -94,7 +95,8 @@ final class AppExecutionRequestTests: XCTestCase {
             targetPath: "/Users/maple/Desktop/a.txt",
             sourcePaths: ["/Users/maple/Desktop/a.txt"],
             iconSystemImageName: "doc.fill",
-            iconColorName: "blue"
+            iconColorName: "blue",
+            iconImageData: iconImageData
         )
 
         let encoded = try JSONEncoder().encode(request)
@@ -106,6 +108,7 @@ final class AppExecutionRequestTests: XCTestCase {
         XCTAssertEqual(decoded.sourcePaths, ["/Users/maple/Desktop/a.txt"])
         XCTAssertEqual(decoded.iconSystemImageName, "doc.fill")
         XCTAssertEqual(decoded.iconColorName, "blue")
+        XCTAssertEqual(decoded.iconImageData, iconImageData)
     }
 
     func testRequestRoundTripPreservesToolboxFields() throws {

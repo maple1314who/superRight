@@ -20,6 +20,7 @@ public struct MenuItemConfiguration: Codable, Equatable, Identifiable, Sendable 
     public var destinationPath: String?
     public var iconSystemImageName: String?
     public var iconColorName: String?
+    public var importedIconImageData: Data?
     public var toolboxOption: String?
     public var requiresInstallationCheck: Bool
 
@@ -39,6 +40,7 @@ public struct MenuItemConfiguration: Codable, Equatable, Identifiable, Sendable 
         destinationPath: String? = nil,
         iconSystemImageName: String? = nil,
         iconColorName: String? = nil,
+        importedIconImageData: Data? = nil,
         toolboxOption: String? = nil,
         requiresInstallationCheck: Bool = false
     ) {
@@ -57,6 +59,7 @@ public struct MenuItemConfiguration: Codable, Equatable, Identifiable, Sendable 
         self.destinationPath = destinationPath
         self.iconSystemImageName = iconSystemImageName
         self.iconColorName = iconColorName
+        self.importedIconImageData = importedIconImageData
         self.toolboxOption = toolboxOption
         self.requiresInstallationCheck = requiresInstallationCheck
     }

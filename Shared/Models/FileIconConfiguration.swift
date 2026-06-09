@@ -1,7 +1,9 @@
+import Foundation
+
 /// 文件/文件夹自定义图标预设。
 ///
 /// 配置界面负责维护该模型；Finder 右键菜单会把启用的预设转换成“设置图标”
-/// 动作，主 App 再根据 `systemImageName` 和 `iconColorName` 渲染实际 Finder 图标。
+/// 动作，主 App 优先使用导入的本地图片，未导入时再根据 SF Symbol 和颜色渲染图标。
 public struct FileIconConfiguration: Codable, Equatable, Identifiable, Sendable {
     public var id: String
     public var isEnabled: Bool
@@ -10,6 +12,8 @@ public struct FileIconConfiguration: Codable, Equatable, Identifiable, Sendable 
     public var systemImageName: String
     public var iconColorName: String
     public var sizeDescription: String
+    public var importedImageData: Data?
+    public var importedImageFileName: String?
 
     public init(
         id: String,
@@ -18,7 +22,9 @@ public struct FileIconConfiguration: Codable, Equatable, Identifiable, Sendable 
         order: Int,
         systemImageName: String,
         iconColorName: String,
-        sizeDescription: String
+        sizeDescription: String,
+        importedImageData: Data? = nil,
+        importedImageFileName: String? = nil
     ) {
         self.id = id
         self.isEnabled = isEnabled
@@ -27,6 +33,8 @@ public struct FileIconConfiguration: Codable, Equatable, Identifiable, Sendable 
         self.systemImageName = systemImageName
         self.iconColorName = iconColorName
         self.sizeDescription = sizeDescription
+        self.importedImageData = importedImageData
+        self.importedImageFileName = importedImageFileName
     }
 
     public static let defaultPresets: [FileIconConfiguration] = [

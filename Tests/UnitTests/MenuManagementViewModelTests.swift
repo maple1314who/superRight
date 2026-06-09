@@ -47,6 +47,31 @@ final class MenuManagementViewModelTests: XCTestCase {
         XCTAssertEqual(Set(sorted.map(\.order)), Set(0..<sorted.count))
     }
 
+    func testFileIconImageImportAndReorderPersists() throws {
+        let store = InMemoryConfigurationStore(configuration: .default)
+        let viewModel = MenuManagementViewModel(store: store)
+        let firstID = viewModel.sortedFileIconPresets[0].id
+        let thirdID = viewModel.sortedFileIconPresets[2].id
+        let imageData = Data([0x01, 0x02, 0x03])
+
+        viewModel.updateFileIconPresetImage(
+            id: firstID,
+            imageData: imageData,
+            fileName: "local.png",
+            sizeDescription: "64 x 64"
+        )
+        viewModel.moveFileIconPreset(draggedID: firstID, targetID: thirdID)
+
+        let sorted = viewModel.sortedFileIconPresets
+        let movedPreset = try XCTUnwrap(sorted.first { $0.id == firstID })
+
+        XCTAssertEqual(movedPreset.importedImageData, imageData)
+        XCTAssertEqual(movedPreset.importedImageFileName, "local.png")
+        XCTAssertEqual(movedPreset.sizeDescription, "64 x 64")
+        XCTAssertEqual(sorted[2].id, firstID)
+        XCTAssertEqual(Set(sorted.map(\.order)), Set(0..<sorted.count))
+    }
+
     func testMutationTriggersAutomaticSave() throws {
         let store = RecordingConfigurationStore(configuration: .default)
         let viewModel = MenuManagementViewModel(store: store)

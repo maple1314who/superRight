@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## V4.0.21 - 2026-06-09
+
+### 重构
+- 新增主 App `AppExecutionApplicationOpeningAdapter`，集中处理外部应用和工具箱应用的 `NSWorkspace` 打开执行。
+- `AppExecutionRequestHandler` 的打开应用动作改为只保留策略入口，并委托打开执行适配器；应用 Bundle 解析仍由 `AppExecutionApplicationAdapter` 负责。
+- 主 App 与 Finder Extension 版本升级为 `4.0.21 / 2026060945`。
+
+### 验证
+- `swift test`：55 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+- 已安装 `/Applications/右键增强.app`，主 App 和 Finder Extension 均为 `4.0.21 / 2026060945`，插件注册为 `com.maple.right.superright.RightClickFinderExtension(4.0.21)`；最近 5 分钟未发现新崩溃报告。
+
 ## V4.0.20 - 2026-06-09
 
 ### 重构

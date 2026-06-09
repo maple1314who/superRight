@@ -1,5 +1,26 @@
 # CHANGELOG
 
+## V4.0.30 - 2026-06-09
+
+### 改进
+- iShot 工具箱动作从统一启动主应用改为按动作区分执行。
+- “iShot 标注/贴图”优先把 Finder 选中文件交给 iShot 打开；没有选中文件时回退启动 iShot。
+- “iShot 截图”启动 iShot 后尝试触发默认 `Option+A` 截图快捷键；如果当前进程没有辅助功能权限，则只启动 iShot 并写入日志。
+- Finder Extension 转发 `openIShotAnnotation` 时携带选中路径，主 App 可拿到完整选中项执行直达动作。
+- 主 App 与 Finder Extension 版本升级为 `4.0.30 / 2026060954`。
+
+### 发布
+- 已生成 Release DMG：`SuperRight-4.0.30.dmg`，SHA256 为 `4132acf4651281c9bba54c859edbf5390216e86c58341b8c12fae72a1133c287`。
+- 已生成 Sparkle `appcast.xml`，包含 `sparkle:version=2026060954`、`sparkle:shortVersionString=4.0.30` 和 EdDSA 签名。
+- GitHub Release 发布由 `superRight` 仓库工作流上传 `发布/V4.0.30/SuperRight-4.0.30.dmg` 与 `发布/V4.0.30/appcast.xml`。
+- Developer ID 签名与公证按当前需求明确不作为目标项。
+
+### 验证
+- `swift test`：55 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Release -destination platform=macOS -derivedDataPath build/PackageRelease build`：BUILD SUCCEEDED。
+- Sparkle 远端资产待提交发布后验证 `latest/download/appcast.xml` 与 `latest/download/SuperRight-4.0.30.dmg`。
+
 ## V4.0.29 - 2026-06-09
 
 ### 重构
@@ -12,7 +33,7 @@
 - 已生成 Sparkle `appcast.xml`，包含 `sparkle:version=2026060953`、`sparkle:shortVersionString=4.0.29` 和 EdDSA 签名。
 - GitHub Release 发布由 `superRight` 仓库工作流上传 `发布/V4.0.29/SuperRight-4.0.29.dmg` 与 `发布/V4.0.29/appcast.xml`。
 - 已验证 GitHub Release：`https://github.com/maple1314who/superRight/releases/latest/download/appcast.xml` 和 `https://github.com/maple1314who/superRight/releases/latest/download/SuperRight-4.0.29.dmg` 均返回 `200`。
-- 当前包仍使用 Apple Development 证书签名，外部分发前仍需要 Developer ID 签名与 notarization。
+- 当前需求明确不做 Developer ID 签名与 notarization，该项不再作为待办。
 
 ### 验证
 - `swift test`：55 tests, 0 failures。

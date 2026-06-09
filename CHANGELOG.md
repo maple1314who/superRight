@@ -5,6 +5,9 @@
 ### 修复
 - 删除配置界面侧边栏中未实现的“评分”和“订购”入口，避免展示不可用功能。
 
+### 新增
+- Finder 右键菜单按“新建 / 打开 / 工具”分组展示为子菜单，不再把所有动作混在扁平列表中。
+
 ### 验证
 - `swift test`：42 tests, 0 failures。
 - `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：`BUILD SUCCEEDED`。

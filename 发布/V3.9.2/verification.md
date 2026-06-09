@@ -16,4 +16,8 @@
 - 待补充。
 
 ## 线上验证
-- 待上传 GitHub Release 后补充。
+- ：HTTP 200，大小 895 bytes。
+- ：HTTP 200，大小 4089465 bytes。
+- 在线 Appcast 已确认版本 。
+- 在线 Appcast 已确认 enclosure 指向 ，并包含 。
+- DMG SHA256：。

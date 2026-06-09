@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## V3.9.5 - 2026-06-09
+
+### 修复
+- “发送文件到...”新增改为选择真实目录，并自动使用目录名作为显示名称。
+- “发送文件到...”删除改为优先删除选中行，并允许列表删空，不再被配置迁移逻辑自动补回默认项。
+- 主 App 请求处理器按 `requestID` 去重，避免 Finder Extension 同时通过队列和分布式通知传递时同一复制/移动动作执行多次。
+
+### 验证
+- `swift test`：47 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：`BUILD SUCCEEDED`。
+
 ## V3.9.4 - 2026-06-09
 
 ### 修复

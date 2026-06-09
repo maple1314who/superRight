@@ -72,6 +72,46 @@ final class MenuManagementViewModelTests: XCTestCase {
         XCTAssertEqual(Set(sorted.map(\.order)), Set(0..<sorted.count))
     }
 
+    func testAddAndRemoveSendToDestinationUsesSelectedDirectory() throws {
+        var configuration = SharedConfiguration.default
+        configuration.sendToDestinations = []
+        let store = InMemoryConfigurationStore(configuration: configuration)
+        let viewModel = MenuManagementViewModel(store: store)
+        let directoryURL = URL(fileURLWithPath: NSHomeDirectory(), isDirectory: true)
+            .appendingPathComponent("Downloads", isDirectory: true)
+
+        let id = viewModel.addSendToDestination(directoryURL: directoryURL)
+        let added = try XCTUnwrap(viewModel.sortedSendToDestinations.first)
+
+        XCTAssertEqual(added.id, id)
+        XCTAssertEqual(added.directoryPath, directoryURL.path)
+        XCTAssertEqual(added.title, "Downloads")
+
+        viewModel.removeSendToDestination(id: id)
+
+        XCTAssertTrue(viewModel.sortedSendToDestinations.isEmpty)
+    }
+
+    func testRemoveLastSendToDestinationCanLeaveEmptyList() throws {
+        var configuration = SharedConfiguration.default
+        configuration.sendToDestinations = [
+            FileDestinationConfiguration(
+                id: "only",
+                title: "Only",
+                directoryPath: NSHomeDirectory(),
+                order: 0,
+                systemImageName: "folder.fill",
+                iconColorName: "cyan"
+            )
+        ]
+        let store = InMemoryConfigurationStore(configuration: configuration)
+        let viewModel = MenuManagementViewModel(store: store)
+
+        viewModel.removeLastSendToDestination()
+
+        XCTAssertTrue(viewModel.sortedSendToDestinations.isEmpty)
+    }
+
     func testMutationTriggersAutomaticSave() throws {
         let store = RecordingConfigurationStore(configuration: .default)
         let viewModel = MenuManagementViewModel(store: store)

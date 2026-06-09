@@ -273,12 +273,17 @@ public final class MenuManagementViewModel: ObservableObject {
         persistIfPossible()
     }
 
-    public func addSendToDestination() {
+    @discardableResult
+    public func addSendToDestination(directoryURL: URL? = nil) -> String {
         let nextIndex = (configuration.sendToDestinations.map(\.order).max() ?? -1) + 1
+        let directoryPath = directoryURL?.path ?? NSHomeDirectory()
+        let directoryName = directoryURL?.lastPathComponent.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let title = directoryName.isEmpty ? "新目录" : directoryName
+        let id = "custom_\(UUID().uuidString)"
         let destination = FileDestinationConfiguration(
-            id: "custom_\(UUID().uuidString)",
-            title: "新目录",
-            directoryPath: NSHomeDirectory(),
+            id: id,
+            title: title,
+            directoryPath: directoryPath,
             order: nextIndex,
             systemImageName: "folder.fill",
             iconColorName: "cyan"
@@ -286,6 +291,7 @@ public final class MenuManagementViewModel: ObservableObject {
         configuration.sendToDestinations.append(destination)
         configuration.normalizeOrder()
         persistIfPossible()
+        return id
     }
 
     public func removeLastSendToDestination() {
@@ -294,9 +300,12 @@ public final class MenuManagementViewModel: ObservableObject {
         }
         configuration.sendToDestinations.sort { $0.order < $1.order }
         configuration.sendToDestinations.removeLast()
-        if configuration.sendToDestinations.isEmpty {
-            configuration.sendToDestinations = FileDestinationConfiguration.defaultSendDestinations
-        }
+        configuration.normalizeOrder()
+        persistIfPossible()
+    }
+
+    public func removeSendToDestination(id: String) {
+        configuration.sendToDestinations.removeAll { $0.id == id }
         configuration.normalizeOrder()
         persistIfPossible()
     }

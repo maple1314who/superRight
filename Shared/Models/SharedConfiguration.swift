@@ -189,29 +189,8 @@ public struct SharedConfiguration: Codable, Equatable, Sendable {
             }
         }
 
-        let existingDestinationIDs = Set(upgraded.sendToDestinations.map(\.id))
-        let missingDestinations = defaultConfiguration.sendToDestinations.filter { !existingDestinationIDs.contains($0.id) }
-        if !missingDestinations.isEmpty {
-            var nextOrder = (upgraded.sendToDestinations.map(\.order).max() ?? -1) + 1
-            for destination in missingDestinations {
-                var appended = destination
-                appended.order = nextOrder
-                nextOrder += 1
-                upgraded.sendToDestinations.append(appended)
-            }
-        }
-
-        let existingFavoriteIDs = Set(upgraded.favoriteDirectories.map(\.id))
-        let missingFavorites = defaultConfiguration.favoriteDirectories.filter { !existingFavoriteIDs.contains($0.id) }
-        if !missingFavorites.isEmpty {
-            var nextOrder = (upgraded.favoriteDirectories.map(\.order).max() ?? -1) + 1
-            for directory in missingFavorites {
-                var appended = directory
-                appended.order = nextOrder
-                nextOrder += 1
-                upgraded.favoriteDirectories.append(appended)
-            }
-        }
+        // 目录类数组允许用户删空或只保留部分项目；旧配置缺字段时已在 decoder
+        // 阶段补默认值，这里不能再按 ID 补齐，否则删除“发送到/常用目录”会失效。
 
         let existingIconPresetIDs = Set(upgraded.fileIconPresets.map(\.id))
         let missingIconPresets = defaultConfiguration.fileIconPresets.filter { !existingIconPresetIDs.contains($0.id) }

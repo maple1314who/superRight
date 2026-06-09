@@ -340,24 +340,26 @@ private struct NewFileSettingsView: View {
 
 private struct SendToSettingsView: View {
     @ObservedObject var viewModel: MenuManagementViewModel
+    @State private var selectedDestinationID: String?
 
     var body: some View {
         VStack(spacing: 12) {
             SendToDestinationTableView(
                 viewModel: viewModel,
                 showIcons: viewModel.configuration.appSettings.showSendToIcons,
-                emptyRowCount: 12
+                emptyRowCount: 12,
+                selectedDestinationID: $selectedDestinationID
             )
             .padding(.horizontal, 20)
             .padding(.top, 45)
 
             HStack(spacing: 8) {
                 SmallSquareButton(systemImage: "plus") {
-                    viewModel.addSendToDestination()
+                    addSendToDestination()
                 }
 
                 SmallSquareButton(systemImage: "minus") {
-                    viewModel.removeLastSendToDestination()
+                    removeSelectedSendToDestination()
                 }
                 .disabled(viewModel.sortedSendToDestinations.isEmpty)
 
@@ -405,12 +407,40 @@ private struct SendToSettingsView: View {
             Spacer()
         }
     }
+
+    private func addSendToDestination() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.prompt = "添加"
+        panel.message = "选择一个目录加入“发送文件到”。"
+
+        panel.begin { response in
+            guard response == .OK, let url = panel.url else {
+                return
+            }
+
+            selectedDestinationID = viewModel.addSendToDestination(directoryURL: url)
+        }
+    }
+
+    private func removeSelectedSendToDestination() {
+        if let selectedDestinationID,
+           viewModel.sortedSendToDestinations.contains(where: { $0.id == selectedDestinationID }) {
+            viewModel.removeSendToDestination(id: selectedDestinationID)
+        } else {
+            viewModel.removeLastSendToDestination()
+        }
+        selectedDestinationID = viewModel.sortedSendToDestinations.last?.id
+    }
 }
 
 private struct SendToDestinationTableView: View {
     @ObservedObject var viewModel: MenuManagementViewModel
     let showIcons: Bool
     let emptyRowCount: Int
+    @Binding var selectedDestinationID: String?
 
     var body: some View {
         SettingsTableFrame {
@@ -426,6 +456,8 @@ private struct SendToDestinationTableView: View {
                     destination: destination,
                     showIcon: showIcons,
                     isOdd: index % 2 == 1,
+                    isSelected: selectedDestinationID == destination.id,
+                    select: { selectedDestinationID = destination.id },
                     update: viewModel.updateSendToDestination
                 )
             }
@@ -439,6 +471,8 @@ private struct SendToDestinationRowView: View {
     let destination: FileDestinationConfiguration
     let showIcon: Bool
     let isOdd: Bool
+    let isSelected: Bool
+    let select: () -> Void
     let update: (FileDestinationConfiguration) -> Void
 
     var body: some View {
@@ -478,7 +512,16 @@ private struct SendToDestinationRowView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .frame(height: 32)
-        .background(isOdd ? Color.black.opacity(0.035) : Color.white)
+        .contentShape(Rectangle())
+        .background(rowBackground)
+        .onTapGesture(perform: select)
+    }
+
+    private var rowBackground: Color {
+        if isSelected {
+            return Color.accentColor.opacity(0.18)
+        }
+        return isOdd ? Color.black.opacity(0.035) : Color.white
     }
 
     private func update<Value>(_ keyPath: WritableKeyPath<FileDestinationConfiguration, Value>, value: Value) {

@@ -13,11 +13,15 @@
 - AppCore 使用 `SharedConstants.appCheckForUpdatesNotification` 通知主 App，由 AppDelegate 统一调用 Sparkle。
 
 ## 本地验证
-- 待补充。
+- `swift test`：42 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：`BUILD SUCCEEDED`。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Release -destination platform=macOS -derivedDataPath build/DerivedData build`：`BUILD SUCCEEDED`。
+- 生成 DMG：`dist/sparkle/SuperRight-3.9.2.dmg`。
+- 生成 Appcast：`dist/sparkle/appcast.xml`，版本 `3.9.2 / 2026060911`，包含 `sparkle:edSignature`。
 
 ## 线上验证
-- ：HTTP 200，大小 895 bytes。
-- ：HTTP 200，大小 4089465 bytes。
-- 在线 Appcast 已确认版本 。
-- 在线 Appcast 已确认 enclosure 指向 ，并包含 。
-- DMG SHA256：。
+- `https://github.com/maple1314who/superRight/releases/latest/download/appcast.xml`：HTTP 200，大小 895 bytes。
+- `https://github.com/maple1314who/superRight/releases/latest/download/SuperRight-3.9.2.dmg`：HTTP 200，大小 4089465 bytes。
+- 在线 Appcast 已确认版本 `3.9.2 / 2026060911`。
+- 在线 Appcast 已确认 enclosure 指向 `SuperRight-3.9.2.dmg`，并包含 `sparkle:edSignature`。
+- DMG SHA256：`89d49289573d773718d74da366676fa9d198ae22af29043da01ff40b70deb1e7`。

@@ -14,6 +14,7 @@
 - `swift test`：42 tests, 0 failures。
 - `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：`BUILD SUCCEEDED`。
 - `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Release -destination platform=macOS -derivedDataPath build/DerivedData build`：`BUILD SUCCEEDED`。
+- GitHub Release 资源已公开验证，`appcast.xml` 和 `SuperRight-3.9.2.dmg` 均返回 HTTP 200。
 
 ## V3.9.1 - 2026-06-09
 

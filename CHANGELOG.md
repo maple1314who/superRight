@@ -19,7 +19,7 @@
 - `swift test`：55 tests, 0 failures。
 - `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
 - `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Release -destination platform=macOS -derivedDataPath build/PackageRelease build`：BUILD SUCCEEDED。
-- Sparkle 远端资产待提交发布后验证 `latest/download/appcast.xml` 与 `latest/download/SuperRight-4.0.30.dmg`。
+- 已验证 GitHub Release：`https://github.com/maple1314who/superRight/releases/latest/download/appcast.xml` 与 `https://github.com/maple1314who/superRight/releases/latest/download/SuperRight-4.0.30.dmg` 均返回 `200`，远端 DMG SHA256 为 `4132acf4651281c9bba54c859edbf5390216e86c58341b8c12fae72a1133c287`。
 
 ## V4.0.29 - 2026-06-09
 

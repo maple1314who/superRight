@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## V4.0.18 - 2026-06-09
+
+### 重构
+- 新增主 App `AppExecutionRequestQueueAdapter`，集中处理 App Group 请求队列目录定位、请求文件保存、按文件名排序读取和消费清理。
+- `AppExecutionRequestHandler` 保留通知入口、去重和策略执行，把队列文件读写委托给适配器。
+- 主 App 与 Finder Extension 版本升级为 `4.0.18 / 2026060942`。
+
+### 验证
+- `swift test`：55 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+- 已安装 `/Applications/右键增强.app`，主 App 和 Finder Extension 均为 `4.0.18 / 2026060942`，插件注册为 `com.maple.right.superright.RightClickFinderExtension(4.0.18)`；最近 5 分钟未发现新崩溃报告。
+
 ## V4.0.17 - 2026-06-09
 
 ### 重构

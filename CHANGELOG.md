@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## V3.10.3 - 2026-06-09
+
+### 修复
+- 窗口拖拽改为全窗背景拖拽覆盖层，不再限制为顶部区域。
+- 表格容器新增拖拽排除标记，避免窗口拖拽抢占行排序、滚动、Picker 和文本编辑。
+- 主 App 与 Finder Extension 版本升级为 `3.10.3 / 2026060921`。
+
+### 验证
+- `swift test`：51 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+
 ## V3.10.2 - 2026-06-09
 
 ### 新增

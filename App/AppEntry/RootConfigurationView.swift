@@ -1349,7 +1349,26 @@ private struct SettingsTableFrame<Header: View, Rows: View>: View {
             RoundedRectangle(cornerRadius: 2)
                 .stroke(Color.black.opacity(0.12), lineWidth: 1)
         )
+        .background(WindowDragExclusionMarker())
     }
+}
+
+/// 窗口拖拽排除标记。
+///
+/// 主 App 的全窗拖拽覆盖层会递归查找该 AppKit 标记视图；命中标记区域时，
+/// 覆盖层不处理鼠标事件，保证表格行排序、滚动、Picker 和文本编辑不被拖窗抢占。
+public final class WindowDragExclusionMarkerView: NSView {
+    public override var mouseDownCanMoveWindow: Bool {
+        false
+    }
+}
+
+private struct WindowDragExclusionMarker: NSViewRepresentable {
+    func makeNSView(context: Context) -> NSView {
+        WindowDragExclusionMarkerView()
+    }
+
+    func updateNSView(_ nsView: NSView, context: Context) {}
 }
 
 private let compactEmptyRowCount = 0
@@ -1433,6 +1452,7 @@ private struct NewFileTableView: View {
             RoundedRectangle(cornerRadius: 2)
                 .stroke(Color.black.opacity(0.12), lineWidth: 1)
         )
+        .background(WindowDragExclusionMarker())
     }
 }
 

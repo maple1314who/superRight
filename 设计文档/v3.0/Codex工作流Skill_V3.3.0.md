@@ -1,6 +1,6 @@
 ---
 name: superright-engineering-workflow
-description: Use this skill whenever working on the SuperRight/右键增强 Swift project or when the user asks to continue development with strict engineering workflow. It enforces module comments, documentation after each task, regression testing, Git commits, and clear reporting of unfinished work and next task direction.
+description: Use this skill whenever working on the SuperRight/右键增强 Swift project or when the user asks to continue development with strict engineering workflow. It enforces module comments, documentation after each task, regression testing, Git commits, GitHub packaging/release upload when applicable, and clear reporting of unfinished work and next task direction.
 ---
 
 # SuperRight Engineering Workflow
@@ -22,7 +22,8 @@ For every non-trivial task, follow this sequence:
 4. Update Markdown documentation for the completed task.
 5. Run regression tests before committing.
 6. Commit Git changes with a clear Chinese commit message.
-7. Report what was completed, what was tested, commit hashes, remaining unfinished tasks, and the recommended next task.
+7. For release/packaging/update tasks, build the distributable package and upload the required GitHub Release assets.
+8. Report what was completed, what was tested, commit hashes, release assets, remaining unfinished tasks, and the recommended next task.
 
 Do not skip steps unless the user explicitly asks to stop early. If a step cannot be completed, state the blocker clearly and do not pretend it passed.
 
@@ -101,6 +102,19 @@ After committing:
 - Run `git status --short` again.
 - Report commit hashes.
 
+## Packaging and GitHub Release Rules
+
+When the task involves packaging, releasing, Sparkle updates, version bumps, or the user asks to put the app on GitHub:
+
+1. Build the Release app and package the DMG using the project’s existing scripts or documented release commands.
+2. Generate or update Sparkle metadata when applicable, including `appcast.xml` and signatures.
+3. Upload the DMG, `appcast.xml`, release notes, and any required verification files to the correct GitHub Release or release-assets repository.
+4. Verify uploaded assets from GitHub, not only from local disk. Prefer `gh release view`, `gh release download`, or HTTP status checks for public assets.
+5. Reinstall or launch the packaged app from the generated artifact when the task is installation/update related, then re-register Finder Extension from `/Applications/右键增强.app`.
+6. Document release asset names, GitHub URLs, version/build, Sparkle appcast status, and manual verification results.
+
+Do not claim a release is complete until the GitHub assets are uploaded and verified. Do not claim Developer ID notarization unless a Developer ID certificate and `notarytool` submission actually succeeded.
+
 ## Final Report Format
 
 At the end of each completed task, report concisely:
@@ -109,6 +123,7 @@ At the end of each completed task, report concisely:
 - Regression test results.
 - Documentation updated.
 - Git commits created.
+- GitHub Release assets uploaded and verified, when applicable.
 - Worktree cleanliness.
 - Remaining unfinished tasks.
 - Recommended next task direction.

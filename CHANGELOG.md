@@ -1,5 +1,26 @@
 # CHANGELOG
 
+## V4.0.31 - 2026-06-09
+
+### 改进
+- 将 Sparkle 更新弹窗和更新流程默认语言切换为中文，避免用户看到英文更新提示。
+- 主 App `Info.plist` 新增 `CFBundleAllowMixedLocalizations=true` 与 `CFBundleLocalizations`，允许 Sparkle 框架加载内置 `zh_CN`、`zh_TW`、`zh_HK` 本地化资源。
+- Xcode 工程开发区域切换为 `zh_CN`，保留英文作为回退语言，不改变更新下载、签名校验和安装替换逻辑。
+- 主 App 与 Finder Extension 版本升级为 `4.0.31 / 2026060955`。
+
+### 发布
+- 已生成 Release DMG：`SuperRight-4.0.31.dmg`，SHA256 为 `5e7e09cb5b787efab55e22f06ef0f65b7caf15cc8244af2b83d0c04261b1626f`。
+- 已生成 Sparkle `appcast.xml`，包含 `sparkle:version=2026060955`、`sparkle:shortVersionString=4.0.31` 和 EdDSA 签名。
+- GitHub Release 发布由 `superRight` 仓库工作流上传 `发布/V4.0.31/SuperRight-4.0.31.dmg`、`发布/V4.0.31/appcast.xml` 与 `发布/V4.0.31/release-notes.md`。
+- Developer ID 签名与公证按当前需求明确不作为目标项。
+
+### 验证
+- `plutil -lint 右键增强/Info.plist`：OK。
+- `swift test`：55 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Release -destination platform=macOS -derivedDataPath build/PackageRelease build`：BUILD SUCCEEDED。
+- 已确认 Release App 元数据包含 `CFBundleDevelopmentRegion=zh_CN`、`CFBundleAllowMixedLocalizations=true` 和 `zh_CN/zh_TW/zh_HK/en` 本地化列表；Sparkle 框架内存在 `zh_CN.lproj/Sparkle.strings`。
+
 ## V4.0.30 - 2026-06-09
 
 ### 改进

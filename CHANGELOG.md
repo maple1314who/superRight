@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## V4.0.3 - 2026-06-09
+
+### 重构
+- 新增主 App `AppExecutionApplicationAdapter`，统一解析外部应用、工具箱应用和 iShot 的 Bundle 路径。
+- `AppExecutionRequestHandler` 改为通过应用适配器获取 App URL，移除自身的 Bundle ID 和安装路径解析细节。
+- 主 App 与 Finder Extension 版本升级为 `4.0.3 / 2026060927`。
+
+### 验证
+- `swift test`：55 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+
 ## V4.0.2 - 2026-06-09
 
 ### 重构

@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## V4.0.24 - 2026-06-09
+
+### 重构
+- 新增主 App `AppExecutionCutAdapter`，集中处理剪切动作的选中项解析、URL 去重和剪贴板 move 语义写入。
+- `AppExecutionRequestHandler` 的剪切动作改为只保留策略入口并委托剪切适配器。
+- 主 App 与 Finder Extension 版本升级为 `4.0.24 / 2026060948`。
+
+### 验证
+- `swift test`：55 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+- 已安装 `/Applications/右键增强.app`，主 App 和 Finder Extension 均为 `4.0.24 / 2026060948`，插件注册为 `com.maple.right.superright.RightClickFinderExtension(4.0.24)`；最近 5 分钟未发现新崩溃报告。
+
 ## V4.0.23 - 2026-06-09
 
 ### 重构

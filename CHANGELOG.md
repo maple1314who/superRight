@@ -8,7 +8,7 @@
 - 主 App entitlements 增加网络访问和 Sparkle sandbox XPC mach lookup 例外。
 
 ### 改进
-- 发版流程增加 Sparkle EdDSA 公钥、ZIP 包和 Appcast 生成记录。
+- 发版流程增加 Sparkle EdDSA 公钥、DMG 包和 Appcast 生成记录。
 - 主 App 与 Finder Extension 版本升级为 `3.9.0 / 2026060909`。
 
 ### 验证

@@ -171,6 +171,7 @@ public struct SharedConfiguration: Codable, Equatable, Sendable {
                 upgraded.menuItems.append(appended)
             }
         }
+        upgraded.migrateMenuDisplayPreferencesIfNeeded(defaultConfiguration: defaultConfiguration)
 
         for application in ExternalApplication.allCases where upgraded.applicationPaths[application] == nil {
             upgraded.applicationPaths[application] =
@@ -219,6 +220,17 @@ public struct SharedConfiguration: Codable, Equatable, Sendable {
         upgraded.migrateDefaultMonitoredDirectoriesIfNeeded()
         upgraded.normalizeOrder()
         return upgraded
+    }
+
+    private mutating func migrateMenuDisplayPreferencesIfNeeded(defaultConfiguration: SharedConfiguration) {
+        for index in menuItems.indices where menuItems[index].promotedToMainMenu == nil {
+            guard let defaultItem = defaultConfiguration.menuItems.first(where: { $0.id == menuItems[index].id }),
+                  let defaultPromoted = defaultItem.promotedToMainMenu else {
+                continue
+            }
+
+            menuItems[index].promotedToMainMenu = defaultPromoted
+        }
     }
 
     private mutating func migrateDefaultMonitoredDirectoriesIfNeeded() {
@@ -306,7 +318,8 @@ public struct SharedConfiguration: Codable, Equatable, Sendable {
                 order: 5,
                 group: .tool,
                 visibility: SceneVisibility(blankSpace: true, file: true, folder: true),
-                actionType: .copyPath
+                actionType: .copyPath,
+                promotedToMainMenu: true
             )
         ],
         appSettings: .default,

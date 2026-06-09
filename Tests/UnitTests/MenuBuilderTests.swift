@@ -445,6 +445,39 @@ final class MenuBuilderTests: XCTestCase {
         XCTAssertFalse(blankMenu.contains { $0.actionType == .convertToIOSIcons })
     }
 
+    func testFinderStyleGroupingPromotesCommonFileActions() throws {
+        let builder = MenuBuilder(
+            availabilityChecker: MockAvailabilityChecker(unavailableApps: [])
+        )
+        let tempDirectory = try TemporaryDirectory()
+        defer { tempDirectory.remove() }
+        let fileURL = tempDirectory.url.appendingPathComponent("sample.txt")
+        try "hello".data(using: .utf8)?.write(to: fileURL)
+
+        let context = FinderSelectionContext(
+            selectedItemURLs: [fileURL],
+            currentDirectoryURL: tempDirectory.url
+        )
+
+        let menu = builder.buildMenu(context: context, configuration: .default)
+        let copyPathItem = try XCTUnwrap(menu.first { $0.id == "copy_path" })
+        let airDropItem = try XCTUnwrap(menu.first { $0.actionType == .sendViaAirDrop })
+        let cutItem = try XCTUnwrap(menu.first { $0.actionType == .cutItems })
+        let copyNameItem = try XCTUnwrap(menu.first { $0.actionType == .copyFileName })
+        let fileInfoItem = try XCTUnwrap(menu.first { $0.actionType == .showFileInfo })
+        let iconItem = try XCTUnwrap(menu.first { $0.actionType == .applyFileIcon })
+        let sendToItem = try XCTUnwrap(menu.first { $0.actionType == .copyToDirectory })
+
+        XCTAssertTrue(copyPathItem.isPromotedToMainMenu)
+        XCTAssertTrue(airDropItem.isPromotedToMainMenu)
+        XCTAssertTrue(cutItem.isPromotedToMainMenu)
+        XCTAssertTrue(copyNameItem.isPromotedToMainMenu)
+        XCTAssertTrue(fileInfoItem.isPromotedToMainMenu)
+        XCTAssertEqual(iconItem.group, .icon)
+        XCTAssertEqual(sendToItem.group, .sendTo)
+        XCTAssertFalse(menu.contains { $0.id == "toolbox_copy_path_toolbox" })
+    }
+
     func testPermanentDeleteToolboxItemRequiresExplicitEnable() throws {
         let builder = MenuBuilder(
             availabilityChecker: MockAvailabilityChecker(unavailableApps: [])

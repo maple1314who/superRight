@@ -242,4 +242,40 @@ final class UserDefaultsConfigurationStoreTests: XCTestCase {
 
         defaults.removePersistentDomain(forName: suiteName)
     }
+
+    func testLoadMigratesMissingMenuPromotionPreference() throws {
+        let suiteName = "superright.tests.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            XCTFail("无法创建测试用 UserDefaults")
+            return
+        }
+
+        let store = UserDefaultsConfigurationStore(
+            suiteName: suiteName,
+            userDefaults: defaults
+        )
+
+        let encodedDefault = try JSONEncoder().encode(SharedConfiguration.default)
+        var rootObject = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: encodedDefault) as? [String: Any]
+        )
+
+        if var menuItems = rootObject["menuItems"] as? [[String: Any]] {
+            for index in menuItems.indices where (menuItems[index]["id"] as? String) == "copy_path" {
+                menuItems[index].removeValue(forKey: "promotedToMainMenu")
+            }
+            rootObject["menuItems"] = menuItems
+        } else {
+            XCTFail("无法构造 legacy menuItems")
+            return
+        }
+
+        let legacyData = try JSONSerialization.data(withJSONObject: rootObject)
+        defaults.set(legacyData, forKey: SharedConstants.configurationStorageKey)
+
+        let loaded = try store.load()
+
+        XCTAssertEqual(loaded.menuItems.first { $0.id == "copy_path" }?.promotedToMainMenu, true)
+        defaults.removePersistentDomain(forName: suiteName)
+    }
 }

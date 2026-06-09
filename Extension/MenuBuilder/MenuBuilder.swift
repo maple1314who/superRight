@@ -83,6 +83,7 @@ public struct MenuBuilder {
         let toolboxItems = buildToolboxItems(
             context: context,
             configuration: configuration,
+            hidesDuplicateCopyPath: configuredItems.contains { $0.actionType == .copyPath },
             startingOrder: max(
                 configuredItems.map(\.order).max() ?? -1,
                 templateItems.map(\.order).max() ?? -1,
@@ -154,7 +155,7 @@ public struct MenuBuilder {
                         title: "复制到 \(destination.title)",
                         isEnabled: true,
                         order: order,
-                        group: .tool,
+                        group: .sendTo,
                         visibility: SceneVisibility(blankSpace: false, file: true, folder: true),
                         actionType: .copyToDirectory,
                         destinationPath: destination.normalizedDirectoryPath
@@ -172,7 +173,7 @@ public struct MenuBuilder {
                         title: "移动到 \(destination.title)",
                         isEnabled: true,
                         order: order,
-                        group: .tool,
+                        group: .sendTo,
                         visibility: SceneVisibility(blankSpace: false, file: true, folder: true),
                         actionType: .moveToDirectory,
                         destinationPath: destination.normalizedDirectoryPath
@@ -204,7 +205,7 @@ public struct MenuBuilder {
                     title: "打开 \(directory.title)",
                     isEnabled: true,
                     order: startingOrder + offset,
-                    group: .tool,
+                    group: .open,
                     visibility: SceneVisibility(blankSpace: true, file: true, folder: true),
                     actionType: .openDirectory,
                     destinationPath: directory.normalizedDirectoryPath
@@ -234,7 +235,7 @@ public struct MenuBuilder {
                 title: "设置图标：\(preset.title)",
                 isEnabled: true,
                 order: startingOrder + offset,
-                group: .tool,
+                group: .icon,
                 visibility: SceneVisibility(blankSpace: false, file: true, folder: true),
                 actionType: .applyFileIcon,
                 iconSystemImageName: preset.systemImageName,
@@ -249,7 +250,7 @@ public struct MenuBuilder {
                 title: "还原默认图标",
                 isEnabled: true,
                 order: startingOrder + items.count,
-                group: .tool,
+                group: .icon,
                 visibility: SceneVisibility(blankSpace: false, file: true, folder: true),
                 actionType: .removeCustomIcon
             )
@@ -261,6 +262,7 @@ public struct MenuBuilder {
     private func buildToolboxItems(
         context: FinderSelectionContext,
         configuration: SharedConfiguration,
+        hidesDuplicateCopyPath: Bool,
         startingOrder: Int
     ) -> [MenuItemConfiguration] {
         guard configuration.appSettings.enableToolbox else {
@@ -269,6 +271,7 @@ public struct MenuBuilder {
 
         return configuration.sortedToolboxItems()
             .filter { $0.isEnabled }
+            .filter { !(hidesDuplicateCopyPath && $0.actionType == .copyPath) }
             .filter { isToolboxItemVisible($0, context: context) }
             .enumerated()
             .map { offset, item in
@@ -277,14 +280,37 @@ public struct MenuBuilder {
                     title: item.title,
                     isEnabled: true,
                     order: startingOrder + offset,
-                    group: .tool,
+                    group: toolboxGroup(for: item.actionType),
                     visibility: toolboxVisibility(for: item.actionType),
                     actionType: item.actionType,
                     iconSystemImageName: item.systemImageName,
                     iconColorName: item.iconColorName,
-                    toolboxOption: item.option
+                    toolboxOption: item.option,
+                    promotedToMainMenu: isPromotedToolboxAction(item.actionType)
                 )
             }
+    }
+
+    private func toolboxGroup(for actionType: MenuActionType) -> MenuGroup {
+        switch actionType {
+        case .openToolboxApplication:
+            return .open
+        case .sendShortcutToDesktop:
+            return .sendTo
+        case .applyFileIcon, .removeCustomIcon:
+            return .icon
+        default:
+            return .tool
+        }
+    }
+
+    private func isPromotedToolboxAction(_ actionType: MenuActionType) -> Bool {
+        switch actionType {
+        case .showFileInfo, .sendViaAirDrop, .copyFileName, .cutItems:
+            return true
+        default:
+            return false
+        }
     }
 
     private func isToolboxItemVisible(

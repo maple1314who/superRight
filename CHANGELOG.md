@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## V4.0.6 - 2026-06-09
+
+### 重构
+- 新增主 App `AppExecutionClipboardAdapter`，集中处理文本、Finder 文件 URL 移动语义和图片三类剪贴板写入。
+- `AppExecutionRequestHandler` 的复制文件名、剪切选中项、二维码写入剪贴板动作改为委托剪贴板适配器执行。
+- 主 App 与 Finder Extension 版本升级为 `4.0.6 / 2026060930`。
+
+### 验证
+- `swift test`：55 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+- 已安装 `/Applications/右键增强.app`，主 App 和 Finder Extension 均为 `4.0.6 / 2026060930`，插件注册为 `com.maple.right.superright.RightClickFinderExtension(4.0.6)`。
+- 最近 5 分钟未发现 `右键增强` 或 `RightClickFinderExtension` 新崩溃报告。
+
 ## V4.0.5 - 2026-06-09
 
 ### 重构

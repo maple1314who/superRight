@@ -10,8 +10,10 @@
 - Release 资产使用 ASCII 文件名 `SuperRight-3.9.1.dmg`，避免 GitHub 对中文资产名做兼容转换。
 
 ### 验证
+- `swift test`：42 tests, 0 failures。
 - `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Release -destination platform=macOS -derivedDataPath build/DerivedData build`：`BUILD SUCCEEDED`。
 - Sparkle Appcast 已生成并包含 `sparkle:edSignature`。
+- GitHub Release 资源已公开验证，`appcast.xml` 和 `SuperRight-3.9.1.dmg` 均返回 HTTP 200。
 
 ## V3.9.0 - 2026-06-09
 

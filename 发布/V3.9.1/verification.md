@@ -17,4 +17,8 @@
 - 生成 Appcast：`dist/sparkle/appcast.xml`，版本 `3.9.1 / 2026060910`，包含 `sparkle:edSignature`。
 
 ## 线上验证
-- 待上传 GitHub Release 后补充 HTTP 状态、文件大小和 SHA256。
+- `https://github.com/maple1314who/superRight/releases/latest/download/appcast.xml`：HTTP 200，大小 895 bytes。
+- `https://github.com/maple1314who/superRight/releases/latest/download/SuperRight-3.9.1.dmg`：HTTP 200，大小 4084246 bytes。
+- 在线 Appcast 已确认版本 `3.9.1 / 2026060910`。
+- 在线 Appcast 已确认 enclosure 指向 `SuperRight-3.9.1.dmg`，并包含 `sparkle:edSignature`。
+- DMG SHA256：`12dcd434d879e1f6a789c5978f200ec8ce78f8856fb67f533daf395d8d0dae8e`。

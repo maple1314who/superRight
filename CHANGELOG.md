@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## V3.10.4 - 2026-06-09
+
+### 修复
+- “发送文件到...”和“常用目录”改为固定短列表视口，底部新增/删除/重置按钮和开关区域不再随行数变化上下抖动。
+- 短列表继续使用 `LazyVStack` 承载行内容，超过 5 行后在列表内部滚动，保持上下两个区域视觉分离。
+- 主 App 与 Finder Extension 版本升级为 `3.10.4 / 2026060922`。
+
+### 验证
+- `swift test`：51 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+
 ## V3.10.3 - 2026-06-09
 
 ### 修复

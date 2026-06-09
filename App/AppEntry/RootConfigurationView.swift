@@ -81,6 +81,13 @@ private enum RootConfigurationLayout {
     /// 主窗口使用 full-size content view，系统红黄绿按钮浮在内容上方；
     /// 表格页统一下移，保持和旧版“超级右键”一致的顶部呼吸区。
     static let contentTopPadding: CGFloat = 90
+
+    /// 短配置列表的固定视口高度。
+    ///
+    /// “发送文件到...”和“常用目录”采用上方列表、下方操作区的两段式布局；
+    /// 列表区域固定为 5 行视口，更多数据在内部通过 `LazyVStack` 滚动，避免
+    /// 添加/删除项目时底部按钮和开关跟随列表高度抖动。
+    static let compactListViewportHeight: CGFloat = 29 + 32 * 5
 }
 
 private enum SidebarSection: String, Identifiable {
@@ -454,7 +461,7 @@ private struct SendToDestinationTableView: View {
     @State private var pendingDropTargetID: String?
 
     var body: some View {
-        SettingsTableFrame(height: compactTableHeight(rowCount: viewModel.sortedSendToDestinations.count)) {
+        SettingsTableFrame(height: RootConfigurationLayout.compactListViewportHeight) {
             HStack(spacing: 0) {
                 HeaderCell("图标", width: 60)
                 HeaderCell("真实路径", alignment: .leading)
@@ -621,7 +628,7 @@ private struct FavoriteDirectoryTableView: View {
     @State private var pendingDropTargetID: String?
 
     var body: some View {
-        SettingsTableFrame(height: compactTableHeight(rowCount: viewModel.sortedFavoriteDirectories.count)) {
+        SettingsTableFrame(height: RootConfigurationLayout.compactListViewportHeight) {
             HStack(spacing: 0) {
                 HeaderCell("图标", width: 60)
                 HeaderCell("真实路径", alignment: .leading)
@@ -1372,11 +1379,6 @@ private struct WindowDragExclusionMarker: NSViewRepresentable {
 }
 
 private let compactEmptyRowCount = 0
-
-private func compactTableHeight(rowCount: Int) -> CGFloat {
-    let visibleRows = max(rowCount + compactEmptyRowCount, 1)
-    return min(455, 29 + CGFloat(visibleRows * 32))
-}
 
 private struct EmptyStripedRows: View {
     let startIndex: Int

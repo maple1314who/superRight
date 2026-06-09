@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## V3.8.0 - 2026-06-09
+
+### 新增
+- 工具箱新增“彻底删除”默认项，配置界面可启用、禁用和改名。
+- Finder Extension 支持将“彻底删除”转发给主 App，并携带 Finder 选中路径。
+- 主 App 支持直接删除选中文件或文件夹，不经过废纸篓。
+
+### 改进
+- “彻底删除”作为破坏性动作默认关闭，旧配置迁移只补配置项，不自动出现在右键菜单。
+- ExtensionCore 对“彻底删除”保持转发语义，不在 Finder Extension 进程直接删除文件。
+- 主 App 与 Finder Extension 版本升级为 `3.8.0 / 2026060908`。
+
+### 验证
+- `swift test`：42 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：`BUILD SUCCEEDED`。
+
 ## V3.7.0 - 2026-06-09
 
 ### 新增

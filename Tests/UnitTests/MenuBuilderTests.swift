@@ -380,6 +380,39 @@ final class MenuBuilderTests: XCTestCase {
         XCTAssertEqual(item.title, "隔空投送")
     }
 
+    func testPermanentDeleteToolboxItemRequiresExplicitEnable() throws {
+        let builder = MenuBuilder(
+            availabilityChecker: MockAvailabilityChecker(unavailableApps: [])
+        )
+        let tempDirectory = try TemporaryDirectory()
+        defer { tempDirectory.remove() }
+        let fileURL = tempDirectory.url.appendingPathComponent("sample.txt")
+        try "hello".data(using: .utf8)?.write(to: fileURL)
+
+        let context = FinderSelectionContext(
+            selectedItemURLs: [fileURL],
+            currentDirectoryURL: tempDirectory.url
+        )
+
+        XCTAssertFalse(
+            builder.buildMenu(context: context, configuration: .default)
+                .contains { $0.actionType == .permanentlyDelete }
+        )
+
+        var configuration = SharedConfiguration.default
+        guard let index = configuration.toolboxItems.firstIndex(where: { $0.id == "permanently_delete" }) else {
+            XCTFail("默认工具箱缺少彻底删除项")
+            return
+        }
+        configuration.toolboxItems[index].isEnabled = true
+
+        let menu = builder.buildMenu(context: context, configuration: configuration)
+        let item = try XCTUnwrap(menu.first { $0.actionType == .permanentlyDelete })
+
+        XCTAssertEqual(item.id, "toolbox_permanently_delete")
+        XCTAssertEqual(item.title, "彻底删除")
+    }
+
     func testToolboxDirectoryItemsAreAvailableForBlankSpace() throws {
         let builder = MenuBuilder(
             availabilityChecker: MockAvailabilityChecker(unavailableApps: [])
@@ -399,6 +432,7 @@ final class MenuBuilderTests: XCTestCase {
         XCTAssertTrue(actionTypes.contains(.unhideDirectoryItems))
         XCTAssertFalse(actionTypes.contains(.copyFileName))
         XCTAssertFalse(actionTypes.contains(.sendViaAirDrop))
+        XCTAssertFalse(actionTypes.contains(.permanentlyDelete))
     }
 
     func testToolboxCanBeDisabled() throws {

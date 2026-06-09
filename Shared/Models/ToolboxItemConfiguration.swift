@@ -72,11 +72,21 @@ public struct ToolboxItemConfiguration: Codable, Equatable, Identifiable, Sendab
             systemImageName: "paperplane.fill",
             iconColorName: "blue"
         ),
+        // 破坏性动作默认关闭，避免升级后用户右键菜单立即出现不可恢复删除入口。
+        .init(
+            id: "permanently_delete",
+            isEnabled: false,
+            title: "彻底删除",
+            order: 4,
+            actionType: .permanentlyDelete,
+            systemImageName: "trash.slash.fill",
+            iconColorName: "red"
+        ),
         .init(
             id: "hide_selected_items",
             isEnabled: true,
             title: "隐藏已选文件",
-            order: 4,
+            order: 5,
             actionType: .hideSelectedItems,
             systemImageName: "eye.slash.fill",
             iconColorName: "gray"
@@ -85,7 +95,7 @@ public struct ToolboxItemConfiguration: Codable, Equatable, Identifiable, Sendab
             id: "unhide_selected_items",
             isEnabled: true,
             title: "取消隐藏已选文件",
-            order: 5,
+            order: 6,
             actionType: .unhideSelectedItems,
             systemImageName: "eye.fill",
             iconColorName: "gray"
@@ -94,7 +104,7 @@ public struct ToolboxItemConfiguration: Codable, Equatable, Identifiable, Sendab
             id: "hide_directory_items",
             isEnabled: true,
             title: "隐藏全部文件",
-            order: 6,
+            order: 7,
             actionType: .hideDirectoryItems,
             systemImageName: "eye.slash.fill",
             iconColorName: "gray"
@@ -103,7 +113,7 @@ public struct ToolboxItemConfiguration: Codable, Equatable, Identifiable, Sendab
             id: "unhide_directory_items",
             isEnabled: true,
             title: "取消隐藏全部文件",
-            order: 7,
+            order: 8,
             actionType: .unhideDirectoryItems,
             systemImageName: "eye.fill",
             iconColorName: "gray"

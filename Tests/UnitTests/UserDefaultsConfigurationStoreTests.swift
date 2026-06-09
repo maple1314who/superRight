@@ -147,6 +147,7 @@ final class UserDefaultsConfigurationStoreTests: XCTestCase {
 
         if var toolboxItems = rootObject["toolboxItems"] as? [[String: Any]] {
             toolboxItems.removeAll { ($0["id"] as? String) == "send_via_airdrop" }
+            toolboxItems.removeAll { ($0["id"] as? String) == "permanently_delete" }
             rootObject["toolboxItems"] = toolboxItems
         } else {
             XCTFail("无法构造 legacy toolboxItems")
@@ -164,6 +165,10 @@ final class UserDefaultsConfigurationStoreTests: XCTestCase {
             ExternalApplication.idea.defaultBundlePath
         )
         XCTAssertNotNil(loaded.toolboxItems.first { $0.id == "send_via_airdrop" })
+        XCTAssertEqual(
+            loaded.toolboxItems.first { $0.id == "permanently_delete" }?.isEnabled,
+            false
+        )
 
         defaults.removePersistentDomain(forName: suiteName)
     }

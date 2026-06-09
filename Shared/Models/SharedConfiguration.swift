@@ -1,3 +1,8 @@
+/// App 与 Finder Extension 共用的配置根对象。
+///
+/// 该模型会被写入 App Group 的 UserDefaults。新增字段必须通过 `init(from:)`
+/// 和 `upgradedWithDefaults()` 保持向后兼容，避免旧版本配置升级后丢失菜单项
+/// 或功能开关。
 public struct SharedConfiguration: Codable, Equatable, Sendable {
     public var menuItems: [MenuItemConfiguration]
     public var appSettings: AppSettings
@@ -52,6 +57,7 @@ public struct SharedConfiguration: Codable, Equatable, Sendable {
         ) ?? FileDestinationConfiguration.defaultFavoriteDirectories
     }
 
+    /// 统一修正所有可排序配置的顺序值，保证 UI、菜单构建和持久化顺序一致。
     public mutating func normalizeOrder() {
         menuItems = menuItems
             .sorted { $0.order < $1.order }
@@ -103,6 +109,9 @@ public struct SharedConfiguration: Codable, Equatable, Sendable {
         favoriteDirectories.sorted { $0.order < $1.order }
     }
 
+    /// 将旧配置补齐到当前版本默认结构。
+    ///
+    /// 这里只追加新增默认项，不删除用户已有配置。
     public func upgradedWithDefaults() -> SharedConfiguration {
         var upgraded = self
         let defaultConfiguration = SharedConfiguration.default

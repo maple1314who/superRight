@@ -8,6 +8,7 @@
 - 主 App 与 Finder Extension 的真实版本统一为 `3.3.0 / 2026060903`。
 
 ### 文档
+- 补充核心模块源码注释，覆盖 Shared、ExtensionCore、AppCore、Finder Extension 和主 App 执行链路。
 - 新增模块说明文档，明确每个模块职责、关键文件、维护规则和功能接入流程。
 - 新增版本管理说明，明确 `MARKETING_VERSION`、`CURRENT_PROJECT_VERSION` 和发版记录同步规则。
 

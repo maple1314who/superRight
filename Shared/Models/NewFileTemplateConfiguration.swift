@@ -1,5 +1,8 @@
 import Foundation
 
+/// “新建文件”模板配置。
+///
+/// 配置界面负责编辑该模型，Finder 菜单会把启用的模板转换成 `createFile` 动作。
 public struct NewFileTemplateConfiguration: Codable, Equatable, Identifiable, Sendable {
     public var id: String
     public var isEnabled: Bool
@@ -36,6 +39,7 @@ public struct NewFileTemplateConfiguration: Codable, Equatable, Identifiable, Se
         self.iconColorName = iconColorName
     }
 
+    /// 去掉用户可能输入的前导点，保证文件扩展名拼接稳定。
     public var normalizedFileExtension: String {
         fileExtension.trimmingCharacters(in: CharacterSet(charactersIn: "."))
     }

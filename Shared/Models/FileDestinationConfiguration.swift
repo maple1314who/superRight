@@ -1,5 +1,9 @@
 import Foundation
 
+/// 目录型功能配置。
+///
+/// 当前复用于“发送文件到...”“移动文件到...”和“常用目录”，通过不同配置数组
+/// 区分业务来源。
 public struct FileDestinationConfiguration: Codable, Equatable, Identifiable, Sendable {
     public var id: String
     public var title: String
@@ -24,6 +28,7 @@ public struct FileDestinationConfiguration: Codable, Equatable, Identifiable, Se
         self.iconColorName = iconColorName
     }
 
+    /// 展开 `~` 并标准化路径，供菜单构建和主 App 执行文件操作使用。
     public var normalizedDirectoryPath: String {
         URL(fileURLWithPath: (directoryPath as NSString).expandingTildeInPath, isDirectory: true)
             .standardizedFileURL

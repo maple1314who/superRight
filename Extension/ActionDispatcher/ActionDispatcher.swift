@@ -1,6 +1,10 @@
 import Foundation
 import Shared
 
+/// Finder Extension 侧动作执行错误。
+///
+/// 当前主路径已尽量转交主 App 执行，该错误仍用于可在扩展内安全完成的动作
+/// 和单元测试覆盖。
 public enum ActionDispatchError: Error, Equatable {
     case missingFileNameConfiguration
     case missingDestinationPath
@@ -10,6 +14,10 @@ public enum ActionDispatchError: Error, Equatable {
     case invalidDirectory
 }
 
+/// Finder Extension 内的动作执行器。
+///
+/// 只处理扩展进程可以稳定完成的动作；涉及沙盒权限或用户交互的动作优先
+/// 由主 App 通过 `AppExecutionRequest` 执行。
 public final class ActionDispatcher {
     private let fileManager: FileManager
     private let commandRunner: CommandRunning
@@ -25,6 +33,7 @@ public final class ActionDispatcher {
         self.clipboardWriter = clipboardWriter
     }
 
+    /// 执行一个菜单动作，并返回被创建、打开或处理的目标 URL。
     @discardableResult
     public func execute(
         item: MenuDisplayItem,

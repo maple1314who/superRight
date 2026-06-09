@@ -1,5 +1,9 @@
 import Foundation
 
+/// Finder Extension 转交主 App 执行的动作类型。
+///
+/// 涉及文件写入、打开外部应用、复制/移动文件等需要更稳定权限上下文的动作，
+/// 都通过该枚举进入主 App 执行链路。
 public enum AppExecutionAction: String, Codable, Equatable, Sendable {
     case createFolder
     case createFile
@@ -30,6 +34,10 @@ public enum AppExecutionAction: String, Codable, Equatable, Sendable {
     }
 }
 
+/// Finder Extension 发送给主 App 的跨进程请求。
+///
+/// 请求同时通过分布式通知和 App Group 队列传递。新增字段必须保持可选或提供
+/// 解码默认值，避免队列里的旧 JSON 无法处理。
 public struct AppExecutionRequest: Codable, Sendable {
     public var requestID: String
     public var action: AppExecutionAction

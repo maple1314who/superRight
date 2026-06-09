@@ -1,5 +1,9 @@
 import Foundation
 
+/// 全局应用设置。
+///
+/// 这些开关同时影响配置界面、Finder 监听目录、菜单生成和主 App 显示方式。
+/// 新增开关时必须在解码逻辑中提供默认值，保证历史配置可直接升级。
 public struct AppSettings: Codable, Equatable, Sendable {
     public var groupMenuByCategory: Bool
     public var hideUnavailableApplications: Bool

@@ -1,10 +1,12 @@
 import Foundation
 import Shared
 
+/// 外部应用可用性检查接口，便于单元测试注入假实现。
 public protocol ApplicationAvailabilityChecking {
     func isInstalled(application: ExternalApplication, configuredPath: String?) -> Bool
 }
 
+/// 基于文件系统的外部应用检查器。
 public struct FileSystemApplicationAvailabilityChecker: ApplicationAvailabilityChecking {
     private let fileManager: FileManager
 
@@ -20,6 +22,10 @@ public struct FileSystemApplicationAvailabilityChecker: ApplicationAvailabilityC
     }
 }
 
+/// Finder 右键菜单构建器。
+///
+/// 该模块只负责把共享配置和 Finder 上下文转换为展示菜单，不执行实际动作。
+/// 动作执行由 Finder Extension 或主 App 请求处理器完成。
 public struct MenuBuilder {
     private let availabilityChecker: ApplicationAvailabilityChecking
 
@@ -29,6 +35,7 @@ public struct MenuBuilder {
         self.availabilityChecker = availabilityChecker
     }
 
+    /// 按当前场景、开关、应用可用性和动态配置生成最终菜单项。
     public func buildMenu(
         context: FinderSelectionContext,
         configuration: SharedConfiguration
@@ -67,6 +74,7 @@ public struct MenuBuilder {
             .map(MenuDisplayItem.init(configuration:))
     }
 
+    /// 将启用的新建文件模板转换为 Finder 菜单项。
     private func buildNewFileTemplateItems(
         context: FinderSelectionContext,
         configuration: SharedConfiguration,
@@ -95,6 +103,7 @@ public struct MenuBuilder {
             }
     }
 
+    /// 根据“发送/移动到目录”配置生成复制或移动菜单项。
     private func buildSendToItems(
         context: FinderSelectionContext,
         configuration: SharedConfiguration,
@@ -151,6 +160,7 @@ public struct MenuBuilder {
         return items
     }
 
+    /// 根据常用目录配置生成打开目录菜单项。
     private func buildFavoriteDirectoryItems(
         configuration: SharedConfiguration,
         startingOrder: Int

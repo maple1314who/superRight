@@ -2,6 +2,10 @@ import Combine
 import Foundation
 import Shared
 
+/// 配置界面的状态管理入口。
+///
+/// SwiftUI 视图只通过该 ViewModel 读写共享配置，避免多个页面直接操作
+/// `ConfigurationStore` 导致状态不同步。
 @MainActor
 public final class MenuManagementViewModel: ObservableObject {
     @Published public private(set) var configuration: SharedConfiguration
@@ -42,6 +46,7 @@ public final class MenuManagementViewModel: ObservableObject {
         logConfiguration(prefix: "App load")
     }
 
+    /// 将当前内存配置写回 App Group，并输出调试摘要。
     public func save() throws {
         try store.save(configuration)
         logConfiguration(prefix: "App save")
@@ -331,6 +336,9 @@ public final class MenuManagementViewModel: ObservableObject {
         return index < sortedMenuItems.count - 1
     }
 
+    /// UI 修改后的统一持久化入口。
+    ///
+    /// 这里故意吞掉错误并写日志，避免单个开关保存失败导致配置窗口崩溃。
     private func persistIfPossible() {
         try? store.save(configuration)
         logConfiguration(prefix: "App autosave")

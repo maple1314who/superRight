@@ -4,19 +4,22 @@ public struct SharedConfiguration: Codable, Equatable, Sendable {
     public var applicationPaths: [ExternalApplication: String]
     public var newFileTemplates: [NewFileTemplateConfiguration]
     public var sendToDestinations: [FileDestinationConfiguration]
+    public var favoriteDirectories: [FileDestinationConfiguration]
 
     public init(
         menuItems: [MenuItemConfiguration],
         appSettings: AppSettings,
         applicationPaths: [ExternalApplication: String],
         newFileTemplates: [NewFileTemplateConfiguration] = NewFileTemplateConfiguration.defaultTemplates,
-        sendToDestinations: [FileDestinationConfiguration] = FileDestinationConfiguration.defaultSendDestinations
+        sendToDestinations: [FileDestinationConfiguration] = FileDestinationConfiguration.defaultSendDestinations,
+        favoriteDirectories: [FileDestinationConfiguration] = FileDestinationConfiguration.defaultFavoriteDirectories
     ) {
         self.menuItems = menuItems
         self.appSettings = appSettings
         self.applicationPaths = applicationPaths
         self.newFileTemplates = newFileTemplates
         self.sendToDestinations = sendToDestinations
+        self.favoriteDirectories = favoriteDirectories
     }
 
     enum CodingKeys: String, CodingKey {
@@ -25,6 +28,7 @@ public struct SharedConfiguration: Codable, Equatable, Sendable {
         case applicationPaths
         case newFileTemplates
         case sendToDestinations
+        case favoriteDirectories
     }
 
     public init(from decoder: Decoder) throws {
@@ -42,6 +46,10 @@ public struct SharedConfiguration: Codable, Equatable, Sendable {
             [FileDestinationConfiguration].self,
             forKey: .sendToDestinations
         ) ?? FileDestinationConfiguration.defaultSendDestinations
+        self.favoriteDirectories = try container.decodeIfPresent(
+            [FileDestinationConfiguration].self,
+            forKey: .favoriteDirectories
+        ) ?? FileDestinationConfiguration.defaultFavoriteDirectories
     }
 
     public mutating func normalizeOrder() {
@@ -69,6 +77,14 @@ public struct SharedConfiguration: Codable, Equatable, Sendable {
                 next.order = index
                 return next
             }
+        favoriteDirectories = favoriteDirectories
+            .sorted { $0.order < $1.order }
+            .enumerated()
+            .map { index, directory in
+                var next = directory
+                next.order = index
+                return next
+            }
     }
 
     public func sortedMenuItems() -> [MenuItemConfiguration] {
@@ -81,6 +97,10 @@ public struct SharedConfiguration: Codable, Equatable, Sendable {
 
     public func sortedSendToDestinations() -> [FileDestinationConfiguration] {
         sendToDestinations.sorted { $0.order < $1.order }
+    }
+
+    public func sortedFavoriteDirectories() -> [FileDestinationConfiguration] {
+        favoriteDirectories.sorted { $0.order < $1.order }
     }
 
     public func upgradedWithDefaults() -> SharedConfiguration {
@@ -125,6 +145,18 @@ public struct SharedConfiguration: Codable, Equatable, Sendable {
                 appended.order = nextOrder
                 nextOrder += 1
                 upgraded.sendToDestinations.append(appended)
+            }
+        }
+
+        let existingFavoriteIDs = Set(upgraded.favoriteDirectories.map(\.id))
+        let missingFavorites = defaultConfiguration.favoriteDirectories.filter { !existingFavoriteIDs.contains($0.id) }
+        if !missingFavorites.isEmpty {
+            var nextOrder = (upgraded.favoriteDirectories.map(\.order).max() ?? -1) + 1
+            for directory in missingFavorites {
+                var appended = directory
+                appended.order = nextOrder
+                nextOrder += 1
+                upgraded.favoriteDirectories.append(appended)
             }
         }
 
@@ -206,6 +238,7 @@ public struct SharedConfiguration: Codable, Equatable, Sendable {
             .idea: ExternalApplication.idea.defaultBundlePath
         ],
         newFileTemplates: NewFileTemplateConfiguration.defaultTemplates,
-        sendToDestinations: FileDestinationConfiguration.defaultSendDestinations
+        sendToDestinations: FileDestinationConfiguration.defaultSendDestinations,
+        favoriteDirectories: FileDestinationConfiguration.defaultFavoriteDirectories
     )
 }

@@ -29,6 +29,10 @@ public final class MenuManagementViewModel: ObservableObject {
         configuration.sortedSendToDestinations()
     }
 
+    public var sortedFavoriteDirectories: [FileDestinationConfiguration] {
+        configuration.sortedFavoriteDirectories()
+    }
+
     public func menuItems(in group: MenuGroup) -> [MenuItemConfiguration] {
         sortedMenuItems.filter { $0.group == group }
     }
@@ -146,6 +150,16 @@ public final class MenuManagementViewModel: ObservableObject {
         persistIfPossible()
     }
 
+    public func updateShowFavoriteDirectoryIcons(_ enabled: Bool) {
+        configuration.appSettings.showFavoriteDirectoryIcons = enabled
+        persistIfPossible()
+    }
+
+    public func updateEnableFavoriteDirectories(_ enabled: Bool) {
+        configuration.appSettings.enableFavoriteDirectories = enabled
+        persistIfPossible()
+    }
+
     public func updateNewFileTemplate(_ template: NewFileTemplateConfiguration) {
         guard let index = configuration.newFileTemplates.firstIndex(where: { $0.id == template.id }) else {
             return
@@ -227,6 +241,48 @@ public final class MenuManagementViewModel: ObservableObject {
 
     public func resetSendToDestinations() {
         configuration.sendToDestinations = FileDestinationConfiguration.defaultSendDestinations
+        persistIfPossible()
+    }
+
+    public func updateFavoriteDirectory(_ directory: FileDestinationConfiguration) {
+        guard let index = configuration.favoriteDirectories.firstIndex(where: { $0.id == directory.id }) else {
+            return
+        }
+        configuration.favoriteDirectories[index] = directory
+        configuration.normalizeOrder()
+        persistIfPossible()
+    }
+
+    public func addFavoriteDirectory() {
+        let nextIndex = (configuration.favoriteDirectories.map(\.order).max() ?? -1) + 1
+        let directory = FileDestinationConfiguration(
+            id: "custom_\(UUID().uuidString)",
+            title: "新目录",
+            directoryPath: NSHomeDirectory(),
+            order: nextIndex,
+            systemImageName: "folder.fill",
+            iconColorName: "cyan"
+        )
+        configuration.favoriteDirectories.append(directory)
+        configuration.normalizeOrder()
+        persistIfPossible()
+    }
+
+    public func removeLastFavoriteDirectory() {
+        guard !configuration.favoriteDirectories.isEmpty else {
+            return
+        }
+        configuration.favoriteDirectories.sort { $0.order < $1.order }
+        configuration.favoriteDirectories.removeLast()
+        if configuration.favoriteDirectories.isEmpty {
+            configuration.favoriteDirectories = FileDestinationConfiguration.defaultFavoriteDirectories
+        }
+        configuration.normalizeOrder()
+        persistIfPossible()
+    }
+
+    public func resetFavoriteDirectories() {
+        configuration.favoriteDirectories = FileDestinationConfiguration.defaultFavoriteDirectories
         persistIfPossible()
     }
 

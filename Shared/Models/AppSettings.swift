@@ -9,6 +9,8 @@ public struct AppSettings: Codable, Equatable, Sendable {
     public var showSendToIcons: Bool
     public var enableCopyTo: Bool
     public var enableMoveTo: Bool
+    public var showFavoriteDirectoryIcons: Bool
+    public var enableFavoriteDirectories: Bool
     public var openNewFileAfterCreate: Bool
     public var playSoundAfterCreate: Bool
     public var monitoredDirectoryPaths: [String]
@@ -22,6 +24,8 @@ public struct AppSettings: Codable, Equatable, Sendable {
         showSendToIcons: Bool,
         enableCopyTo: Bool,
         enableMoveTo: Bool,
+        showFavoriteDirectoryIcons: Bool,
+        enableFavoriteDirectories: Bool,
         openNewFileAfterCreate: Bool,
         playSoundAfterCreate: Bool,
         monitoredDirectoryPaths: [String]
@@ -34,6 +38,8 @@ public struct AppSettings: Codable, Equatable, Sendable {
         self.showSendToIcons = showSendToIcons
         self.enableCopyTo = enableCopyTo
         self.enableMoveTo = enableMoveTo
+        self.showFavoriteDirectoryIcons = showFavoriteDirectoryIcons
+        self.enableFavoriteDirectories = enableFavoriteDirectories
         self.openNewFileAfterCreate = openNewFileAfterCreate
         self.playSoundAfterCreate = playSoundAfterCreate
         self.monitoredDirectoryPaths = monitoredDirectoryPaths
@@ -48,6 +54,8 @@ public struct AppSettings: Codable, Equatable, Sendable {
         case showSendToIcons
         case enableCopyTo
         case enableMoveTo
+        case showFavoriteDirectoryIcons
+        case enableFavoriteDirectories
         case openNewFileAfterCreate
         case playSoundAfterCreate
         case monitoredDirectoryPaths
@@ -63,6 +71,8 @@ public struct AppSettings: Codable, Equatable, Sendable {
         self.showSendToIcons = try container.decodeIfPresent(Bool.self, forKey: .showSendToIcons) ?? true
         self.enableCopyTo = try container.decodeIfPresent(Bool.self, forKey: .enableCopyTo) ?? true
         self.enableMoveTo = try container.decodeIfPresent(Bool.self, forKey: .enableMoveTo) ?? false
+        self.showFavoriteDirectoryIcons = try container.decodeIfPresent(Bool.self, forKey: .showFavoriteDirectoryIcons) ?? true
+        self.enableFavoriteDirectories = try container.decodeIfPresent(Bool.self, forKey: .enableFavoriteDirectories) ?? true
         self.openNewFileAfterCreate = try container.decodeIfPresent(Bool.self, forKey: .openNewFileAfterCreate) ?? false
         self.playSoundAfterCreate = try container.decodeIfPresent(Bool.self, forKey: .playSoundAfterCreate) ?? true
         self.monitoredDirectoryPaths = try container.decodeIfPresent([String].self, forKey: .monitoredDirectoryPaths)
@@ -78,6 +88,8 @@ public struct AppSettings: Codable, Equatable, Sendable {
         showSendToIcons: true,
         enableCopyTo: true,
         enableMoveTo: false,
+        showFavoriteDirectoryIcons: true,
+        enableFavoriteDirectories: true,
         openNewFileAfterCreate: false,
         playSoundAfterCreate: true,
         monitoredDirectoryPaths: [defaultDesktopPath]

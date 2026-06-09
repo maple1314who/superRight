@@ -197,6 +197,40 @@ final class ActionDispatcherTests: XCTestCase {
         XCTAssertTrue(FileManager.default.fileExists(atPath: destinationDirectory.url.appendingPathComponent("sample.txt").path))
     }
 
+    func testOpenDirectoryUsesOpenCommand() throws {
+        let commandRunner = MockCommandRunner()
+        let dispatcher = ActionDispatcher(
+            commandRunner: commandRunner,
+            clipboardWriter: MockClipboardWriter()
+        )
+        let destinationDirectory = try TemporaryDirectory()
+        defer { destinationDirectory.remove() }
+
+        let context = FinderSelectionContext(
+            selectedItemURLs: [],
+            currentDirectoryURL: destinationDirectory.url
+        )
+        let item = MenuDisplayItem(
+            id: "favorite_directory_workspace",
+            title: "打开工作区",
+            order: 0,
+            group: .tool,
+            actionType: .openDirectory,
+            targetApplication: nil,
+            fileExtension: nil,
+            defaultFileName: nil,
+            templateContent: nil,
+            destinationPath: destinationDirectory.url.path
+        )
+
+        let resultURL = try dispatcher.execute(item: item, context: context, configuration: .default)
+
+        XCTAssertEqual(resultURL?.path, destinationDirectory.url.path)
+        XCTAssertEqual(commandRunner.invocations.count, 1)
+        XCTAssertEqual(commandRunner.invocations.first?.executable, "/usr/bin/open")
+        XCTAssertEqual(commandRunner.invocations.first?.arguments, [destinationDirectory.url.path])
+    }
+
     func testOpenTerminalUsesConfiguredPathWhenInstalled() throws {
         let commandRunner = MockCommandRunner()
         let dispatcher = ActionDispatcher(

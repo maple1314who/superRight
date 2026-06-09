@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## V3.2.0 - 2026-06-09
+
+### 新增
+- “常用目录”接入真实共享配置，支持新增、删除、重置、编辑路径和显示名称。
+- Finder 右键菜单会根据常用目录配置生成“打开 <目录名>”动作。
+- 新增 `openDirectory` 动作，支持由 Finder Extension 转发给主 App 打开目录。
+
+### 验证
+- `swift test`：31 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：`BUILD SUCCEEDED`。
+
 ## V3.1.0 - 2026-06-09
 
 ### 新增

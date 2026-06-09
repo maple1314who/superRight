@@ -53,7 +53,16 @@ public struct MenuBuilder {
             ) + 1
         )
 
-        return (configuredItems + templateItems + sendToItems)
+        let favoriteDirectoryItems = buildFavoriteDirectoryItems(
+            configuration: configuration,
+            startingOrder: max(
+                configuredItems.map(\.order).max() ?? -1,
+                templateItems.map(\.order).max() ?? -1,
+                sendToItems.map(\.order).max() ?? -1
+            ) + 1
+        )
+
+        return (configuredItems + templateItems + sendToItems + favoriteDirectoryItems)
             .sorted { $0.order < $1.order }
             .map(MenuDisplayItem.init(configuration:))
     }
@@ -140,6 +149,32 @@ public struct MenuBuilder {
         }
 
         return items
+    }
+
+    private func buildFavoriteDirectoryItems(
+        configuration: SharedConfiguration,
+        startingOrder: Int
+    ) -> [MenuItemConfiguration] {
+        guard configuration.appSettings.enableFavoriteDirectories else {
+            return []
+        }
+
+        return configuration.sortedFavoriteDirectories()
+            .filter { !$0.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+            .filter { !$0.directoryPath.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+            .enumerated()
+            .map { offset, directory in
+                MenuItemConfiguration(
+                    id: "favorite_directory_\(directory.id)",
+                    title: "打开 \(directory.title)",
+                    isEnabled: true,
+                    order: startingOrder + offset,
+                    group: .tool,
+                    visibility: SceneVisibility(blankSpace: true, file: true, folder: true),
+                    actionType: .openDirectory,
+                    destinationPath: directory.normalizedDirectoryPath
+                )
+            }
     }
 
     private func shouldKeepMenuItem(

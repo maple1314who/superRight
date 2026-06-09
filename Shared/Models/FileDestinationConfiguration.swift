@@ -37,4 +37,10 @@ public struct FileDestinationConfiguration: Codable, Equatable, Identifiable, Se
         .init(id: "movies", title: "影片", directoryPath: "~/Movies", order: 3, systemImageName: "film.fill", iconColorName: "cyan"),
         .init(id: "documents", title: "文稿", directoryPath: "~/Documents", order: 4, systemImageName: "folder.fill", iconColorName: "cyan")
     ]
+
+    public static let defaultFavoriteDirectories: [FileDestinationConfiguration] = [
+        .init(id: "music", title: "音乐", directoryPath: "~/Music", order: 0, systemImageName: "folder.fill", iconColorName: "cyan"),
+        .init(id: "pictures", title: "图片", directoryPath: "~/Pictures", order: 1, systemImageName: "folder.fill", iconColorName: "cyan"),
+        .init(id: "movies", title: "影片", directoryPath: "~/Movies", order: 2, systemImageName: "folder.fill", iconColorName: "cyan")
+    ]
 }

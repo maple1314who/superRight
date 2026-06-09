@@ -10,10 +10,11 @@ public enum AppExecutionAction: String, Codable, Equatable, Sendable {
     case openIdea
     case copyToDirectory
     case moveToDirectory
+    case openDirectory
 
     public var externalApplication: ExternalApplication? {
         switch self {
-        case .createFolder, .createFile, .copyToDirectory, .moveToDirectory:
+        case .createFolder, .createFile, .copyToDirectory, .moveToDirectory, .openDirectory:
             return nil
         case .openTerminal:
             return .terminal

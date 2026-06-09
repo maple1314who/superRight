@@ -9,4 +9,5 @@ public enum MenuActionType: String, Codable, Sendable {
     case copyPath
     case copyToDirectory
     case moveToDirectory
+    case openDirectory
 }

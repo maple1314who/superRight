@@ -5,17 +5,10 @@ import Shared
 public struct RootConfigurationView: View {
     @StateObject private var viewModel: MenuManagementViewModel
     @State private var selectedSection: SidebarSection = .newFile
-    @State private var sendDestinations = FileDestination.defaultSendDestinations
-    @State private var favoriteDirectories = FileDestination.defaultFavoriteDirectories
     @State private var fileIconPresets = FileIconPreset.defaultPresets
     @State private var toolboxItems = ToolboxItem.defaultItems
-    @State private var showSendIcons = true
-    @State private var showFavoriteIcons = true
     @State private var showFilePresetIcons = true
     @State private var showToolboxIcons = true
-    @State private var enableCopyTo = true
-    @State private var enableMoveTo = false
-    @State private var enableFavoriteDirectories = true
 
     public init(
         store: ConfigurationStore = UserDefaultsConfigurationStore()
@@ -47,9 +40,7 @@ public struct RootConfigurationView: View {
             )
         case .favorites:
             FavoriteDirectoriesView(
-                directories: $favoriteDirectories,
-                showIcons: $showFavoriteIcons,
-                isEnabled: $enableFavoriteDirectories
+                viewModel: viewModel
             )
         case .fileIcon:
             FileIconSettingsView(
@@ -463,15 +454,13 @@ private struct SendToDestinationRowView: View {
 }
 
 private struct FavoriteDirectoriesView: View {
-    @Binding var directories: [FileDestination]
-    @Binding var showIcons: Bool
-    @Binding var isEnabled: Bool
+    @ObservedObject var viewModel: MenuManagementViewModel
 
     var body: some View {
         VStack(spacing: 12) {
-            DirectoryTableView(
-                destinations: $directories,
-                showIcons: showIcons,
+            FavoriteDirectoryTableView(
+                viewModel: viewModel,
+                showIcons: viewModel.configuration.appSettings.showFavoriteDirectoryIcons,
                 emptyRowCount: 16
             )
             .padding(.horizontal, 20)
@@ -479,30 +468,40 @@ private struct FavoriteDirectoriesView: View {
 
             HStack(spacing: 8) {
                 SmallSquareButton(systemImage: "plus") {
-                    directories.append(.empty)
+                    viewModel.addFavoriteDirectory()
                 }
 
                 SmallSquareButton(systemImage: "minus") {
-                    if !directories.isEmpty {
-                        directories.removeLast()
-                    }
+                    viewModel.removeLastFavoriteDirectory()
                 }
-                .disabled(directories.isEmpty)
+                .disabled(viewModel.sortedFavoriteDirectories.isEmpty)
 
                 Spacer()
 
                 Button("重置") {
-                    directories = FileDestination.defaultFavoriteDirectories
+                    viewModel.resetFavoriteDirectories()
                 }
             }
             .padding(.horizontal, 20)
 
             HStack {
-                Toggle("显示图标", isOn: $showIcons)
+                Toggle(
+                    "显示图标",
+                    isOn: Binding(
+                        get: { viewModel.configuration.appSettings.showFavoriteDirectoryIcons },
+                        set: { viewModel.updateShowFavoriteDirectoryIcons($0) }
+                    )
+                )
 
                 Spacer()
 
-                Toggle("启用常用目录", isOn: $isEnabled)
+                Toggle(
+                    "启用常用目录",
+                    isOn: Binding(
+                        get: { viewModel.configuration.appSettings.enableFavoriteDirectories },
+                        set: { viewModel.updateEnableFavoriteDirectories($0) }
+                    )
+                )
             }
             .toggleStyle(.checkbox)
             .font(.system(size: 13))
@@ -511,6 +510,87 @@ private struct FavoriteDirectoriesView: View {
 
             Spacer()
         }
+    }
+}
+
+private struct FavoriteDirectoryTableView: View {
+    @ObservedObject var viewModel: MenuManagementViewModel
+    let showIcons: Bool
+    let emptyRowCount: Int
+
+    var body: some View {
+        SettingsTableFrame {
+            HStack(spacing: 0) {
+                HeaderCell("图标", width: 60)
+                HeaderCell("真实路径", alignment: .leading)
+                HeaderCell("显示名称（点击编辑/按住拖拽）", alignment: .leading)
+            }
+        } rows: {
+            ForEach(viewModel.sortedFavoriteDirectories.indices, id: \.self) { index in
+                let directory = viewModel.sortedFavoriteDirectories[index]
+                FavoriteDirectoryRowView(
+                    directory: directory,
+                    showIcon: showIcons,
+                    isOdd: index % 2 == 1,
+                    update: viewModel.updateFavoriteDirectory
+                )
+            }
+
+            EmptyStripedRows(startIndex: viewModel.sortedFavoriteDirectories.count, count: emptyRowCount)
+        }
+    }
+}
+
+private struct FavoriteDirectoryRowView: View {
+    let directory: FileDestinationConfiguration
+    let showIcon: Bool
+    let isOdd: Bool
+    let update: (FileDestinationConfiguration) -> Void
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ZStack {
+                if showIcon {
+                    SmallIconView(
+                        systemImage: directory.systemImageName,
+                        tint: directory.iconTint
+                    )
+                }
+            }
+            .frame(width: 60)
+
+            TextField(
+                "",
+                text: Binding(
+                    get: { directory.directoryPath },
+                    set: { update(\.directoryPath, value: $0) }
+                )
+            )
+            .textFieldStyle(.plain)
+            .font(.system(size: 13))
+            .padding(.horizontal, 8)
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            TextField(
+                "",
+                text: Binding(
+                    get: { directory.title },
+                    set: { update(\.title, value: $0) }
+                )
+            )
+            .textFieldStyle(.plain)
+            .font(.system(size: 13))
+            .padding(.horizontal, 8)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .frame(height: 32)
+        .background(isOdd ? Color.black.opacity(0.035) : Color.white)
+    }
+
+    private func update<Value>(_ keyPath: WritableKeyPath<FileDestinationConfiguration, Value>, value: Value) {
+        var updated = directory
+        updated[keyPath: keyPath] = value
+        update(updated)
     }
 }
 

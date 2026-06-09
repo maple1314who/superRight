@@ -234,4 +234,56 @@ final class MenuBuilderTests: XCTestCase {
         XCTAssertFalse(menu.contains { $0.id.hasPrefix("copy_to_") })
         XCTAssertFalse(menu.contains { $0.id.hasPrefix("move_to_") })
     }
+
+    func testFavoriteDirectoriesAreAddedForAllScenes() throws {
+        let builder = MenuBuilder(
+            availabilityChecker: MockAvailabilityChecker(unavailableApps: [])
+        )
+        let tempDirectory = try TemporaryDirectory()
+        defer { tempDirectory.remove() }
+
+        var configuration = SharedConfiguration.default
+        configuration.favoriteDirectories = [
+            FileDestinationConfiguration(
+                id: "workspace",
+                title: "工作区",
+                directoryPath: tempDirectory.url.path,
+                order: 0,
+                systemImageName: "folder.fill",
+                iconColorName: "cyan"
+            )
+        ]
+        configuration.appSettings.enableFavoriteDirectories = true
+
+        let context = FinderSelectionContext(
+            selectedItemURLs: [],
+            currentDirectoryURL: tempDirectory.url
+        )
+
+        let menu = builder.buildMenu(context: context, configuration: configuration)
+        let favoriteItem = try XCTUnwrap(menu.first { $0.id == "favorite_directory_workspace" })
+
+        XCTAssertEqual(favoriteItem.title, "打开 工作区")
+        XCTAssertEqual(favoriteItem.actionType, .openDirectory)
+        XCTAssertEqual(favoriteItem.destinationPath, tempDirectory.url.path)
+    }
+
+    func testFavoriteDirectoriesCanBeDisabled() throws {
+        let builder = MenuBuilder(
+            availabilityChecker: MockAvailabilityChecker(unavailableApps: [])
+        )
+        let tempDirectory = try TemporaryDirectory()
+        defer { tempDirectory.remove() }
+
+        var configuration = SharedConfiguration.default
+        configuration.appSettings.enableFavoriteDirectories = false
+
+        let context = FinderSelectionContext(
+            selectedItemURLs: [],
+            currentDirectoryURL: tempDirectory.url
+        )
+
+        let menu = builder.buildMenu(context: context, configuration: configuration)
+        XCTAssertFalse(menu.contains { $0.id.hasPrefix("favorite_directory_") })
+    }
 }

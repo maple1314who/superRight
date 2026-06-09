@@ -80,6 +80,10 @@ public final class ActionDispatcher {
             let destinationURL = try transferSelectedItems(item: item, context: context, shouldMove: true)
             NSLog("ActionDispatcher.execute moveToDirectory destination=%@", destinationURL.path)
             return destinationURL
+        case .openDirectory:
+            let directoryURL = try openDirectory(item: item)
+            NSLog("ActionDispatcher.execute openDirectory destination=%@", directoryURL.path)
+            return directoryURL
         }
     }
 
@@ -207,6 +211,24 @@ public final class ActionDispatcher {
             }
         }
         return destinationDirectoryURL
+    }
+
+    private func openDirectory(item: MenuDisplayItem) throws -> URL {
+        guard let destinationPath = item.destinationPath,
+              !destinationPath.isEmpty else {
+            throw ActionDispatchError.missingDestinationPath
+        }
+
+        let directoryURL = URL(fileURLWithPath: destinationPath, isDirectory: true)
+        try ensureDirectoryExists(directoryURL)
+        let status = try commandRunner.run(
+            executable: "/usr/bin/open",
+            arguments: [directoryURL.path]
+        )
+        if status != 0 {
+            throw ActionDispatchError.commandFailed(status)
+        }
+        return directoryURL
     }
 
     private func availableTransferDestination(

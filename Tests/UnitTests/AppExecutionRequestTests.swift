@@ -5,6 +5,7 @@ final class AppExecutionRequestTests: XCTestCase {
     func testExternalApplicationMapping() {
         XCTAssertNil(AppExecutionAction.createFolder.externalApplication)
         XCTAssertNil(AppExecutionAction.createFile.externalApplication)
+        XCTAssertNil(AppExecutionAction.openDirectory.externalApplication)
         XCTAssertEqual(AppExecutionAction.openTerminal.externalApplication, .terminal)
         XCTAssertEqual(AppExecutionAction.openITerm.externalApplication, .iTerm)
         XCTAssertEqual(AppExecutionAction.openVSCode.externalApplication, .vsCode)
@@ -32,5 +33,23 @@ final class AppExecutionRequestTests: XCTestCase {
             decoded.applicationPath,
             "/System/Applications/Utilities/Terminal.app"
         )
+    }
+
+    func testRequestRoundTripPreservesDirectoryTransferFields() throws {
+        let request = AppExecutionRequest(
+            requestID: "request-2",
+            action: .copyToDirectory,
+            directoryPath: "/Users/maple/Desktop",
+            sourcePaths: ["/Users/maple/Desktop/a.txt"],
+            destinationPath: "/Users/maple/Downloads"
+        )
+
+        let encoded = try JSONEncoder().encode(request)
+        let decoded = try JSONDecoder().decode(AppExecutionRequest.self, from: encoded)
+
+        XCTAssertEqual(decoded.requestID, "request-2")
+        XCTAssertEqual(decoded.action, .copyToDirectory)
+        XCTAssertEqual(decoded.sourcePaths, ["/Users/maple/Desktop/a.txt"])
+        XCTAssertEqual(decoded.destinationPath, "/Users/maple/Downloads")
     }
 }

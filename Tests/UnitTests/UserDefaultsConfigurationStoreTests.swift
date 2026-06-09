@@ -83,7 +83,7 @@ final class UserDefaultsConfigurationStoreTests: XCTestCase {
 
         let loaded = try store.load()
         XCTAssertFalse(loaded.appSettings.monitoredDirectoryPaths.isEmpty)
-        XCTAssertTrue(loaded.appSettings.monitoredDirectoryPaths[0].hasSuffix("/Desktop"))
+        XCTAssertEqual(loaded.appSettings.monitoredDirectoryPaths, AppSettings.defaultMonitoredDirectoryPaths)
         XCTAssertTrue(loaded.appSettings.hideMenuBarIcon)
         XCTAssertFalse(loaded.newFileTemplates.isEmpty)
         XCTAssertTrue(loaded.appSettings.showNewFileIcons)
@@ -96,6 +96,49 @@ final class UserDefaultsConfigurationStoreTests: XCTestCase {
         XCTAssertFalse(loaded.appSettings.openNewFileAfterCreate)
         XCTAssertTrue(loaded.appSettings.playSoundAfterCreate)
 
+        defaults.removePersistentDomain(forName: suiteName)
+    }
+
+    func testLoadMigratesLegacyDesktopOnlyMonitoredDirectoryToHome() throws {
+        let suiteName = "superright.tests.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            XCTFail("无法创建测试用 UserDefaults")
+            return
+        }
+
+        let store = UserDefaultsConfigurationStore(
+            suiteName: suiteName,
+            userDefaults: defaults
+        )
+        var configuration = SharedConfiguration.default
+        configuration.appSettings.monitoredDirectoryPaths = [AppSettings.legacyDesktopPath]
+        defaults.set(try JSONEncoder().encode(configuration), forKey: SharedConstants.configurationStorageKey)
+
+        let loaded = try store.load()
+
+        XCTAssertEqual(loaded.appSettings.monitoredDirectoryPaths, AppSettings.defaultMonitoredDirectoryPaths)
+        defaults.removePersistentDomain(forName: suiteName)
+    }
+
+    func testLoadKeepsCustomMonitoredDirectory() throws {
+        let suiteName = "superright.tests.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            XCTFail("无法创建测试用 UserDefaults")
+            return
+        }
+
+        let store = UserDefaultsConfigurationStore(
+            suiteName: suiteName,
+            userDefaults: defaults
+        )
+        let customPath = NSHomeDirectory().appending("/Downloads")
+        var configuration = SharedConfiguration.default
+        configuration.appSettings.monitoredDirectoryPaths = [customPath]
+        defaults.set(try JSONEncoder().encode(configuration), forKey: SharedConstants.configurationStorageKey)
+
+        let loaded = try store.load()
+
+        XCTAssertEqual(loaded.appSettings.monitoredDirectoryPaths, [customPath])
         defaults.removePersistentDomain(forName: suiteName)
     }
 

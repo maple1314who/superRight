@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## V3.9.4 - 2026-06-09
+
+### 修复
+- 完全磁盘访问权限检测增加系统级 TCC 数据库和 TCC 目录探测，降低系统已勾选但 App 内误判未授权的概率。
+- 主 App Release entitlements 移除沙盒，避免完全磁盘访问能力被 App Sandbox 继续阻断。
+- Finder 扩展默认监听目录从桌面迁移到用户 Home，旧的“仅桌面默认配置”会自动升级。
+- Finder Extension 读取配置失败或监听目录无效时，兜底监听 Home，不再只兜底桌面。
+- Sparkle 安装更新前主动终止 Finder 扩展进程，避免更新后 Finder 继续加载旧 appex。
+
+### 验证
+- `swift test`：45 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：`BUILD SUCCEEDED`。
+
 ## V3.9.3 - 2026-06-09
 
 ### 修复

@@ -4,6 +4,8 @@ import Foundation
 ///
 /// 这些开关同时影响配置界面、Finder 监听目录、菜单生成和主 App 显示方式。
 /// 新增开关时必须在解码逻辑中提供默认值，保证历史配置可直接升级。
+/// Finder Sync 只有在 `monitoredDirectoryPaths` 覆盖的目录中才会加载右键扩展，
+/// 因此默认监听用户 Home，而不是只监听桌面。
 public struct AppSettings: Codable, Equatable, Sendable {
     public var groupMenuByCategory: Bool
     public var hideUnavailableApplications: Bool
@@ -100,7 +102,7 @@ public struct AppSettings: Codable, Equatable, Sendable {
         self.openNewFileAfterCreate = try container.decodeIfPresent(Bool.self, forKey: .openNewFileAfterCreate) ?? false
         self.playSoundAfterCreate = try container.decodeIfPresent(Bool.self, forKey: .playSoundAfterCreate) ?? true
         self.monitoredDirectoryPaths = try container.decodeIfPresent([String].self, forKey: .monitoredDirectoryPaths)
-            ?? [Self.defaultDesktopPath]
+            ?? Self.defaultMonitoredDirectoryPaths
     }
 
     public static let `default` = AppSettings(
@@ -120,10 +122,18 @@ public struct AppSettings: Codable, Equatable, Sendable {
         enableToolbox: true,
         openNewFileAfterCreate: false,
         playSoundAfterCreate: true,
-        monitoredDirectoryPaths: [defaultDesktopPath]
+        monitoredDirectoryPaths: defaultMonitoredDirectoryPaths
     )
 
-    private static var defaultDesktopPath: String {
+    public static var defaultMonitoredDirectoryPaths: [String] {
+        [defaultHomePath]
+    }
+
+    public static var defaultHomePath: String {
+        NSHomeDirectory()
+    }
+
+    public static var legacyDesktopPath: String {
         NSHomeDirectory().appending("/Desktop")
     }
 }

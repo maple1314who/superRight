@@ -1,3 +1,5 @@
+import Foundation
+
 /// App 与 Finder Extension 共用的配置根对象。
 ///
 /// 该模型会被写入 App Group 的 UserDefaults。新增字段必须通过 `init(from:)`
@@ -151,7 +153,9 @@ public struct SharedConfiguration: Codable, Equatable, Sendable {
 
     /// 将旧配置补齐到当前版本默认结构。
     ///
-    /// 这里只追加新增默认项，不删除用户已有配置。
+    /// 这里只追加新增默认项，不删除用户已有配置；唯一例外是早期版本
+    /// 自动写入的“仅桌面监听”默认值，会迁移为 Home 目录，避免 Finder 扩展
+    /// 只能在桌面出现。
     public func upgradedWithDefaults() -> SharedConfiguration {
         var upgraded = self
         let defaultConfiguration = SharedConfiguration.default
@@ -233,8 +237,29 @@ public struct SharedConfiguration: Codable, Equatable, Sendable {
             }
         }
 
+        upgraded.migrateDefaultMonitoredDirectoriesIfNeeded()
         upgraded.normalizeOrder()
         return upgraded
+    }
+
+    private mutating func migrateDefaultMonitoredDirectoriesIfNeeded() {
+        let monitoredPaths = appSettings.monitoredDirectoryPaths
+            .map(Self.standardizedPath)
+            .filter { !$0.isEmpty }
+        let legacyDesktopPath = Self.standardizedPath(AppSettings.legacyDesktopPath)
+
+        guard monitoredPaths.isEmpty || monitoredPaths == [legacyDesktopPath] else {
+            appSettings.monitoredDirectoryPaths = monitoredPaths
+            return
+        }
+
+        appSettings.monitoredDirectoryPaths = AppSettings.defaultMonitoredDirectoryPaths
+    }
+
+    private static func standardizedPath(_ path: String) -> String {
+        URL(fileURLWithPath: (path as NSString).expandingTildeInPath, isDirectory: true)
+            .standardizedFileURL
+            .path
     }
 
     public static let `default` = SharedConfiguration(

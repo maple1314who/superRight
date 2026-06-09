@@ -464,7 +464,7 @@ public final class MenuManagementViewModel: ObservableObject {
     public func removeMonitoredDirectories(atOffsets offsets: IndexSet) {
         configuration.appSettings.monitoredDirectoryPaths.remove(atOffsets: offsets)
         if configuration.appSettings.monitoredDirectoryPaths.isEmpty {
-            configuration.appSettings.monitoredDirectoryPaths = [defaultDesktopPath()]
+            configuration.appSettings.monitoredDirectoryPaths = AppSettings.defaultMonitoredDirectoryPaths
         }
         persistIfPossible()
     }
@@ -522,10 +522,6 @@ public final class MenuManagementViewModel: ObservableObject {
         URL(fileURLWithPath: (path as NSString).expandingTildeInPath, isDirectory: true)
             .standardizedFileURL
             .path
-    }
-
-    private func defaultDesktopPath() -> String {
-        NSHomeDirectory().appending("/Desktop")
     }
 
     private func iconMetadata(for fileExtension: String) -> (systemImageName: String, iconColorName: String) {

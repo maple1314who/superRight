@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## V4.0.4 - 2026-06-09
+
+### 重构
+- 新增主 App `AppExecutionFileSystemAdapter`，集中处理 Finder 选中项解析、复制/移动、目录子项读取和隐藏标记写入。
+- `AppExecutionRequestHandler` 改为通过文件系统适配器执行复制/移动和隐藏操作，移除自身的冲突命名与隐藏标记细节。
+- 主 App 与 Finder Extension 版本升级为 `4.0.4 / 2026060928`。
+
+### 验证
+- `swift test`：55 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
+
 ## V4.0.3 - 2026-06-09
 
 ### 重构

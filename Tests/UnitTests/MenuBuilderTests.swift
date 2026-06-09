@@ -134,6 +134,7 @@ final class MenuBuilderTests: XCTestCase {
                 order: 0,
                 defaultFileName: "Untitled.json",
                 templateContent: "{}\n",
+                templateData: Data([0x7B, 0x7D, 0x0A]),
                 systemImageName: "curlybraces",
                 iconColorName: "blue"
             ),
@@ -158,6 +159,7 @@ final class MenuBuilderTests: XCTestCase {
         XCTAssertEqual(jsonItem.fileExtension, "json")
         XCTAssertEqual(jsonItem.defaultFileName, "Untitled.json")
         XCTAssertEqual(jsonItem.templateContent, "{}\n")
+        XCTAssertEqual(jsonItem.templateData, Data([0x7B, 0x7D, 0x0A]))
         XCTAssertFalse(ids.contains("new_file_template_disabled"))
     }
 

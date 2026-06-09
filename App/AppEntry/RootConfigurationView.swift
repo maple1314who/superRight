@@ -2,6 +2,10 @@ import SwiftUI
 import AppKit
 import Shared
 
+/// 配置界面根视图。
+///
+/// 负责承载侧边栏和各功能设置页，所有配置写入统一委托给
+/// `MenuManagementViewModel`，避免 SwiftUI 页面直接操作 App Group 存储。
 public struct RootConfigurationView: View {
     @StateObject private var viewModel: MenuManagementViewModel
     @State private var selectedSection: SidebarSection = .newFile
@@ -62,7 +66,7 @@ private enum AppVersionInfo {
     static let displayName = "右键增强"
 
     static var version: String {
-        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "3.5.0"
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "3.6.0"
     }
 
     static var sidebarTitle: String {
@@ -226,6 +230,7 @@ private struct SidebarRow: View {
 
 private struct NewFileSettingsView: View {
     @ObservedObject var viewModel: MenuManagementViewModel
+    @State private var importErrorMessage: String?
 
     var body: some View {
         VStack(spacing: 12) {
@@ -239,6 +244,10 @@ private struct NewFileSettingsView: View {
 
             HStack(spacing: 8) {
                 Button("添加模板文件") {
+                    importTemplateFile()
+                }
+
+                Button("添加空白模板") {
                     viewModel.addNewFileTemplate()
                 }
 
@@ -263,6 +272,14 @@ private struct NewFileSettingsView: View {
                 }
             }
             .padding(.horizontal, 20)
+
+            if let importErrorMessage {
+                Text(importErrorMessage)
+                    .font(.system(size: 12))
+                    .foregroundStyle(.red)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 20)
+            }
 
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 14) {
@@ -306,6 +323,28 @@ private struct NewFileSettingsView: View {
             return
         }
         viewModel.removeNewFileTemplate(id: template.id)
+    }
+
+    private func importTemplateFile() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        panel.prompt = "导入"
+        panel.message = "选择一个文件作为新建文件模板，原始内容会被保存到配置中。"
+
+        panel.begin { response in
+            guard response == .OK, let url = panel.url else {
+                return
+            }
+
+            do {
+                try viewModel.importNewFileTemplate(from: url)
+                importErrorMessage = nil
+            } catch {
+                importErrorMessage = "导入失败：\(error.localizedDescription)"
+            }
+        }
     }
 }
 

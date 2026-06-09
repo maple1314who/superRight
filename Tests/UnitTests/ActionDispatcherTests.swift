@@ -71,6 +71,42 @@ final class ActionDispatcherTests: XCTestCase {
         XCTAssertEqual(content, "")
     }
 
+    func testCreateFileWritesImportedTemplateData() throws {
+        let dispatcher = ActionDispatcher(
+            commandRunner: MockCommandRunner(),
+            clipboardWriter: MockClipboardWriter()
+        )
+        let temporaryDirectory = try TemporaryDirectory()
+        defer { temporaryDirectory.remove() }
+        let context = FinderSelectionContext(
+            selectedItemURLs: [],
+            currentDirectoryURL: temporaryDirectory.url
+        )
+        let templateData = Data([0x00, 0x01, 0x02, 0xFF])
+
+        let fileItem = MenuDisplayItem(
+            id: "new_binary",
+            title: "新建二进制模板",
+            order: 0,
+            group: .create,
+            actionType: .createFile,
+            targetApplication: nil,
+            fileExtension: "bin",
+            defaultFileName: "Template.bin",
+            templateContent: "fallback",
+            templateData: templateData
+        )
+
+        let fileURL = try dispatcher.execute(
+            item: fileItem,
+            context: context,
+            configuration: .default
+        )
+
+        XCTAssertEqual(fileURL?.lastPathComponent, "Template.bin")
+        XCTAssertEqual(try Data(contentsOf: fileURL!), templateData)
+    }
+
     func testCreateFolderWithConflictNaming() throws {
         let dispatcher = ActionDispatcher(
             commandRunner: MockCommandRunner(),

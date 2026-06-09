@@ -156,8 +156,12 @@ public final class ActionDispatcher {
                 fileManager: fileManager
             )
 
-            let content = item.templateContent ?? ""
-            try content.data(using: .utf8)?.write(to: destinationURL)
+            if let templateData = item.templateData {
+                try templateData.write(to: destinationURL)
+            } else {
+                let content = item.templateContent ?? ""
+                try content.data(using: .utf8)?.write(to: destinationURL)
+            }
             return destinationURL
         }
     }

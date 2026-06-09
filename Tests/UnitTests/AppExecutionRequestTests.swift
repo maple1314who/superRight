@@ -62,6 +62,28 @@ final class AppExecutionRequestTests: XCTestCase {
         XCTAssertEqual(decoded.destinationPath, "/Users/maple/Downloads")
     }
 
+    func testRequestRoundTripPreservesImportedTemplateData() throws {
+        let templateData = Data([0x00, 0x01, 0x02, 0xFF])
+        let request = AppExecutionRequest(
+            requestID: "request-template",
+            action: .createFile,
+            directoryPath: "/Users/maple/Desktop",
+            defaultFileName: "Template.bin",
+            fileExtension: "bin",
+            templateContent: "fallback",
+            templateData: templateData
+        )
+
+        let encoded = try JSONEncoder().encode(request)
+        let decoded = try JSONDecoder().decode(AppExecutionRequest.self, from: encoded)
+
+        XCTAssertEqual(decoded.requestID, "request-template")
+        XCTAssertEqual(decoded.action, .createFile)
+        XCTAssertEqual(decoded.defaultFileName, "Template.bin")
+        XCTAssertEqual(decoded.templateContent, "fallback")
+        XCTAssertEqual(decoded.templateData, templateData)
+    }
+
     func testRequestRoundTripPreservesFileIconFields() throws {
         let request = AppExecutionRequest(
             requestID: "request-3",

@@ -3,6 +3,8 @@ import Foundation
 /// “新建文件”模板配置。
 ///
 /// 配置界面负责编辑该模型，Finder 菜单会把启用的模板转换成 `createFile` 动作。
+/// `templateData` 用于保存从真实模板文件导入的原始字节；旧的 `templateContent`
+/// 继续兼容纯文本模板和历史配置。
 public struct NewFileTemplateConfiguration: Codable, Equatable, Identifiable, Sendable {
     public var id: String
     public var isEnabled: Bool
@@ -12,6 +14,7 @@ public struct NewFileTemplateConfiguration: Codable, Equatable, Identifiable, Se
     public var order: Int
     public var defaultFileName: String
     public var templateContent: String
+    public var templateData: Data?
     public var systemImageName: String
     public var iconColorName: String
 
@@ -24,6 +27,7 @@ public struct NewFileTemplateConfiguration: Codable, Equatable, Identifiable, Se
         order: Int,
         defaultFileName: String,
         templateContent: String = "",
+        templateData: Data? = nil,
         systemImageName: String,
         iconColorName: String
     ) {
@@ -35,6 +39,7 @@ public struct NewFileTemplateConfiguration: Codable, Equatable, Identifiable, Se
         self.order = order
         self.defaultFileName = defaultFileName
         self.templateContent = templateContent
+        self.templateData = templateData
         self.systemImageName = systemImageName
         self.iconColorName = iconColorName
     }

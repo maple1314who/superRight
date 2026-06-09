@@ -57,6 +57,7 @@ public struct AppExecutionRequest: Codable, Sendable {
     public var defaultFileName: String?
     public var fileExtension: String?
     public var templateContent: String?
+    public var templateData: Data?
     public var targetPath: String?
     public var applicationPath: String?
     public var sourcePaths: [String]
@@ -74,6 +75,7 @@ public struct AppExecutionRequest: Codable, Sendable {
         case defaultFileName
         case fileExtension
         case templateContent
+        case templateData
         case targetPath
         case applicationPath
         case sourcePaths
@@ -92,6 +94,7 @@ public struct AppExecutionRequest: Codable, Sendable {
         defaultFileName: String? = nil,
         fileExtension: String? = nil,
         templateContent: String? = nil,
+        templateData: Data? = nil,
         targetPath: String? = nil,
         applicationPath: String? = nil,
         sourcePaths: [String] = [],
@@ -108,6 +111,7 @@ public struct AppExecutionRequest: Codable, Sendable {
         self.defaultFileName = defaultFileName
         self.fileExtension = fileExtension
         self.templateContent = templateContent
+        self.templateData = templateData
         self.targetPath = targetPath
         self.applicationPath = applicationPath
         self.sourcePaths = sourcePaths
@@ -127,6 +131,7 @@ public struct AppExecutionRequest: Codable, Sendable {
         self.defaultFileName = try container.decodeIfPresent(String.self, forKey: .defaultFileName)
         self.fileExtension = try container.decodeIfPresent(String.self, forKey: .fileExtension)
         self.templateContent = try container.decodeIfPresent(String.self, forKey: .templateContent)
+        self.templateData = try container.decodeIfPresent(Data.self, forKey: .templateData)
         self.targetPath = try container.decodeIfPresent(String.self, forKey: .targetPath)
         self.applicationPath = try container.decodeIfPresent(String.self, forKey: .applicationPath)
         self.sourcePaths = try container.decodeIfPresent([String].self, forKey: .sourcePaths) ?? []

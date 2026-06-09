@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## V3.6.0 - 2026-06-09
+
+### 新增
+- “新建文件”支持从真实文件导入模板，配置界面通过文件选择器读取模板文件。
+- 导入模板会保存原始字节 `templateData`，创建文件时优先按原始字节写出，支持二进制模板和富文本模板。
+- Finder Extension 转发创建文件请求时携带模板原始数据，主 App 执行链路可还原真实模板内容。
+
+### 改进
+- 保留 `templateContent` 作为纯文本模板和历史配置兼容字段。
+- 导入模板会根据文件名和扩展名自动生成显示名称、默认文件名、图标和颜色。
+- 主 App 与 Finder Extension 版本升级为 `3.6.0 / 2026060906`。
+
+### 验证
+- `swift test`：40 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：`BUILD SUCCEEDED`。
+
 ## V3.5.0 - 2026-06-09
 
 ### 新增

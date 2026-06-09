@@ -221,6 +221,34 @@ public final class MenuManagementViewModel: ObservableObject {
         persistIfPossible()
     }
 
+    /// 从真实文件导入模板，保留原始字节，创建文件时可还原二进制格式。
+    public func importNewFileTemplate(from fileURL: URL) throws {
+        let data = try Data(contentsOf: fileURL)
+        let nextIndex = (configuration.newFileTemplates.map(\.order).max() ?? -1) + 1
+        let fileExtension = fileURL.pathExtension
+        let fileName = fileURL.lastPathComponent
+        let baseName = fileURL.deletingPathExtension().lastPathComponent
+        let displayTitle = baseName.isEmpty ? fileName : baseName
+        let icon = iconMetadata(for: fileExtension)
+
+        let template = NewFileTemplateConfiguration(
+            id: "imported_\(UUID().uuidString)",
+            isEnabled: true,
+            title: displayTitle,
+            fileExtension: fileExtension,
+            showInMainMenu: false,
+            order: nextIndex,
+            defaultFileName: fileName.isEmpty ? "Untitled" : fileName,
+            templateContent: String(data: data, encoding: .utf8) ?? "",
+            templateData: data,
+            systemImageName: icon.systemImageName,
+            iconColorName: icon.iconColorName
+        )
+        configuration.newFileTemplates.append(template)
+        configuration.normalizeOrder()
+        persistIfPossible()
+    }
+
     public func removeNewFileTemplate(id: String) {
         configuration.newFileTemplates.removeAll { $0.id == id }
         if configuration.newFileTemplates.isEmpty {
@@ -460,5 +488,30 @@ public final class MenuManagementViewModel: ObservableObject {
 
     private func defaultDesktopPath() -> String {
         NSHomeDirectory().appending("/Desktop")
+    }
+
+    private func iconMetadata(for fileExtension: String) -> (systemImageName: String, iconColorName: String) {
+        switch fileExtension.lowercased() {
+        case "md":
+            return ("m.square.fill", "purple")
+        case "txt":
+            return ("doc.plaintext", "gray")
+        case "rtf":
+            return ("doc.richtext", "brown")
+        case "xml", "html", "css", "js", "json":
+            return ("chevron.left.forwardslash.chevron.right", "blue")
+        case "doc", "docx", "wps":
+            return ("w.square.fill", "blue")
+        case "xls", "xlsx", "csv", "et":
+            return ("x.square.fill", "green")
+        case "ppt", "pptx", "key", "dps":
+            return ("p.square.fill", "orange")
+        case "pages":
+            return ("pencil.and.outline", "orange")
+        case "numbers":
+            return ("chart.bar.fill", "green")
+        default:
+            return ("doc.fill", "gray")
+        }
     }
 }

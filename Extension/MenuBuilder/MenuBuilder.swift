@@ -121,7 +121,8 @@ public struct MenuBuilder {
                     actionType: .createFile,
                     fileExtension: template.normalizedFileExtension,
                     defaultFileName: template.defaultFileName,
-                    templateContent: template.templateContent
+                    templateContent: template.templateContent,
+                    templateData: template.templateData
                 )
             }
     }

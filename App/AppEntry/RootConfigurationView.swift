@@ -154,11 +154,6 @@ private struct SidebarView: View {
                 Text(AppVersionInfo.sidebarTitle)
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(.white)
-
-                Button("评分") {}
-                    .buttonStyle(.plain)
-                    .font(.system(size: 12))
-                    .foregroundStyle(.cyan)
             }
             .frame(height: 208)
 
@@ -177,12 +172,6 @@ private struct SidebarView: View {
             }
 
             Spacer()
-
-            Button("订购") {}
-                .buttonStyle(.plain)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(.cyan)
-                .padding(.bottom, 24)
         }
         .frame(width: 180)
         .background(

@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## V3.9.3 - 2026-06-09
+
+### 修复
+- 删除配置界面侧边栏中未实现的“评分”和“订购”入口，避免展示不可用功能。
+
+### 验证
+- `swift test`：42 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：`BUILD SUCCEEDED`。
+
 ## V3.9.2 - 2026-06-09
 
 ### 修复

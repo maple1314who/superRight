@@ -8,6 +8,9 @@
 - “复制到/移动到/发送快捷方式到桌面”归入“发送到”，“常用目录”归入“打开”，“文件图标预设/还原图标”归入“图标”。
 - 避免内置“复制路径”和工具箱“复制路径”同时出现；旧配置缺少主菜单展示字段时会自动迁移默认展示偏好。
 - 新增本地安装脚本，安装调试构建时会注销 Release 构建目录和 Xcode DerivedData 里的重复 Finder Extension，只保留 `/Applications/右键增强.app`。
+- 主 App 启动和 Sparkle 更新前会自动注销非当前 App bundle 的同 ID Finder Extension，并在清理到重复项时重启 `pkd` 与 Finder，避免用户必须手动执行命令后右键菜单才恢复。
+- 自动清理注册表时改为先用 `awk` 过滤 `pluginkit` 输出，避免全量扩展列表写满管道导致 App 启动清理死锁。
+- Finder 右键菜单分隔线收紧为“高频主菜单项”和“分类子菜单”之间只保留一个分隔，避免每个分类之间空隙过大。
 
 ### 验证
 - `swift test --filter MenuBuilderTests`：19 tests, 0 failures。
@@ -16,6 +19,7 @@
 - `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：BUILD SUCCEEDED。
 - 本机已安装 Debug 构建到 `/Applications/右键增强.app`，Finder Extension 已重新注册为 `com.maple.right.superright.RightClickFinderExtension(4.0.32)`。
 - `bash -n Scripts/install-local-app.sh`：通过。
+- 手动注册 Release 构建目录和 Xcode DerivedData 里的重复 appex 后，重新打开 `/Applications/右键增强.app`，`pluginkit -m -A -D -vv` 最终只剩 `/Applications/右键增强.app/Contents/PlugIns/RightClickFinderExtension.appex`。
 
 ## V4.0.32 - 2026-06-09
 

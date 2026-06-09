@@ -69,7 +69,18 @@ public struct MenuBuilder {
             ) + 1
         )
 
-        return (configuredItems + templateItems + sendToItems + favoriteDirectoryItems)
+        let fileIconItems = buildFileIconItems(
+            context: context,
+            configuration: configuration,
+            startingOrder: max(
+                configuredItems.map(\.order).max() ?? -1,
+                templateItems.map(\.order).max() ?? -1,
+                sendToItems.map(\.order).max() ?? -1,
+                favoriteDirectoryItems.map(\.order).max() ?? -1
+            ) + 1
+        )
+
+        return (configuredItems + templateItems + sendToItems + favoriteDirectoryItems + fileIconItems)
             .sorted { $0.order < $1.order }
             .map(MenuDisplayItem.init(configuration:))
     }
@@ -185,6 +196,50 @@ public struct MenuBuilder {
                     destinationPath: directory.normalizedDirectoryPath
                 )
             }
+    }
+
+    /// 根据文件/文件夹图标预设生成“设置图标”和“还原图标”菜单项。
+    private func buildFileIconItems(
+        context: FinderSelectionContext,
+        configuration: SharedConfiguration,
+        startingOrder: Int
+    ) -> [MenuItemConfiguration] {
+        guard configuration.appSettings.enableFileIconPresets,
+              context.scene != .blankSpace,
+              !context.selectedItemURLs.isEmpty else {
+            return []
+        }
+
+        let presets = configuration.sortedFileIconPresets()
+            .filter { $0.isEnabled }
+            .filter { !$0.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+
+        var items = presets.enumerated().map { offset, preset in
+            MenuItemConfiguration(
+                id: "apply_file_icon_\(preset.id)",
+                title: "设置图标：\(preset.title)",
+                isEnabled: true,
+                order: startingOrder + offset,
+                group: .tool,
+                visibility: SceneVisibility(blankSpace: false, file: true, folder: true),
+                actionType: .applyFileIcon,
+                iconSystemImageName: preset.systemImageName,
+                iconColorName: preset.iconColorName
+            )
+        }
+
+        items.append(
+            MenuItemConfiguration(
+                id: "remove_custom_icon",
+                title: "还原默认图标",
+                isEnabled: true,
+                order: startingOrder + items.count,
+                group: .tool,
+                visibility: SceneVisibility(blankSpace: false, file: true, folder: true),
+                actionType: .removeCustomIcon
+            )
+        )
+        return items
     }
 
     private func shouldKeepMenuItem(

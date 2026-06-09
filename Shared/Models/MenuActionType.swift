@@ -10,4 +10,6 @@ public enum MenuActionType: String, Codable, Sendable {
     case copyToDirectory
     case moveToDirectory
     case openDirectory
+    case applyFileIcon
+    case removeCustomIcon
 }

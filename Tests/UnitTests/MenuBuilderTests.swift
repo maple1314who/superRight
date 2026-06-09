@@ -235,6 +235,83 @@ final class MenuBuilderTests: XCTestCase {
         XCTAssertFalse(menu.contains { $0.id.hasPrefix("move_to_") })
     }
 
+    func testFileIconPresetsAreAddedForSelectedItems() throws {
+        let builder = MenuBuilder(
+            availabilityChecker: MockAvailabilityChecker(unavailableApps: [])
+        )
+        let tempDirectory = try TemporaryDirectory()
+        defer { tempDirectory.remove() }
+        let fileURL = tempDirectory.url.appendingPathComponent("sample.txt")
+        try "hello".data(using: .utf8)?.write(to: fileURL)
+
+        var configuration = SharedConfiguration.default
+        configuration.fileIconPresets = [
+            FileIconConfiguration(
+                id: "blue-doc",
+                isEnabled: true,
+                title: "蓝色文档",
+                order: 0,
+                systemImageName: "doc.fill",
+                iconColorName: "blue",
+                sizeDescription: "128 x 128"
+            ),
+            FileIconConfiguration(
+                id: "disabled",
+                isEnabled: false,
+                title: "隐藏",
+                order: 1,
+                systemImageName: "xmark",
+                iconColorName: "red",
+                sizeDescription: "128 x 128"
+            )
+        ]
+
+        let context = FinderSelectionContext(
+            selectedItemURLs: [fileURL],
+            currentDirectoryURL: tempDirectory.url
+        )
+
+        let menu = builder.buildMenu(context: context, configuration: configuration)
+        let applyItem = try XCTUnwrap(menu.first { $0.id == "apply_file_icon_blue-doc" })
+
+        XCTAssertEqual(applyItem.title, "设置图标：蓝色文档")
+        XCTAssertEqual(applyItem.actionType, .applyFileIcon)
+        XCTAssertEqual(applyItem.iconSystemImageName, "doc.fill")
+        XCTAssertEqual(applyItem.iconColorName, "blue")
+        XCTAssertTrue(menu.contains { $0.id == "remove_custom_icon" && $0.actionType == .removeCustomIcon })
+        XCTAssertFalse(menu.contains { $0.id == "apply_file_icon_disabled" })
+    }
+
+    func testFileIconPresetsAreHiddenForBlankSpaceOrDisabledSetting() throws {
+        let builder = MenuBuilder(
+            availabilityChecker: MockAvailabilityChecker(unavailableApps: [])
+        )
+        let tempDirectory = try TemporaryDirectory()
+        defer { tempDirectory.remove() }
+        let fileURL = tempDirectory.url.appendingPathComponent("sample.txt")
+        try "hello".data(using: .utf8)?.write(to: fileURL)
+
+        let blankContext = FinderSelectionContext(
+            selectedItemURLs: [],
+            currentDirectoryURL: tempDirectory.url
+        )
+        XCTAssertFalse(
+            builder.buildMenu(context: blankContext, configuration: .default)
+                .contains { $0.actionType == .applyFileIcon || $0.actionType == .removeCustomIcon }
+        )
+
+        var configuration = SharedConfiguration.default
+        configuration.appSettings.enableFileIconPresets = false
+        let fileContext = FinderSelectionContext(
+            selectedItemURLs: [fileURL],
+            currentDirectoryURL: tempDirectory.url
+        )
+        XCTAssertFalse(
+            builder.buildMenu(context: fileContext, configuration: configuration)
+                .contains { $0.actionType == .applyFileIcon || $0.actionType == .removeCustomIcon }
+        )
+    }
+
     func testFavoriteDirectoriesAreAddedForAllScenes() throws {
         let builder = MenuBuilder(
             availabilityChecker: MockAvailabilityChecker(unavailableApps: [])

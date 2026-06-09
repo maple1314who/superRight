@@ -5,9 +5,7 @@ import Shared
 public struct RootConfigurationView: View {
     @StateObject private var viewModel: MenuManagementViewModel
     @State private var selectedSection: SidebarSection = .newFile
-    @State private var fileIconPresets = FileIconPreset.defaultPresets
     @State private var toolboxItems = ToolboxItem.defaultItems
-    @State private var showFilePresetIcons = true
     @State private var showToolboxIcons = true
 
     public init(
@@ -44,8 +42,7 @@ public struct RootConfigurationView: View {
             )
         case .fileIcon:
             FileIconSettingsView(
-                presets: $fileIconPresets,
-                showIcons: $showFilePresetIcons
+                viewModel: viewModel
             )
         case .toolbox:
             ToolboxSettingsView(
@@ -68,7 +65,7 @@ private enum AppVersionInfo {
     static let displayName = "右键增强"
 
     static var version: String {
-        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "3.3.0"
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "3.4.0"
     }
 
     static var sidebarTitle: String {
@@ -607,26 +604,27 @@ private struct FavoriteDirectoryRowView: View {
 }
 
 private struct FileIconSettingsView: View {
-    @Binding var presets: [FileIconPreset]
-    @Binding var showIcons: Bool
+    @ObservedObject var viewModel: MenuManagementViewModel
 
     var body: some View {
         VStack(spacing: 12) {
-            FileIconTableView(presets: $presets, showIcons: showIcons)
+            FileIconTableView(
+                presets: viewModel.sortedFileIconPresets,
+                showIcons: viewModel.configuration.appSettings.showFileIconPresetIcons,
+                update: viewModel.updateFileIconPreset
+            )
                 .padding(.horizontal, 20)
                 .padding(.top, 45)
 
             HStack(spacing: 8) {
                 SmallSquareButton(systemImage: "plus") {
-                    presets.append(.empty)
+                    viewModel.addFileIconPreset()
                 }
 
                 SmallSquareButton(systemImage: "minus") {
-                    if !presets.isEmpty {
-                        presets.removeLast()
-                    }
+                    viewModel.removeLastFileIconPreset()
                 }
-                .disabled(presets.isEmpty)
+                .disabled(viewModel.sortedFileIconPresets.isEmpty)
 
                 Text("*自定义图标尺寸建议小于 128 x 128（dpi = 72）")
                     .font(.system(size: 11))
@@ -635,13 +633,27 @@ private struct FileIconSettingsView: View {
                 Spacer()
 
                 Button("重置") {
-                    presets = FileIconPreset.defaultPresets
+                    viewModel.resetFileIconPresets()
                 }
             }
             .padding(.horizontal, 20)
 
             HStack {
-                Toggle("显示图标", isOn: $showIcons)
+                Toggle(
+                    "显示图标",
+                    isOn: Binding(
+                        get: { viewModel.configuration.appSettings.showFileIconPresetIcons },
+                        set: { viewModel.updateShowFileIconPresetIcons($0) }
+                    )
+                )
+
+                Toggle(
+                    "启用右键图标菜单",
+                    isOn: Binding(
+                        get: { viewModel.configuration.appSettings.enableFileIconPresets },
+                        set: { viewModel.updateEnableFileIconPresets($0) }
+                    )
+                )
 
                 Spacer()
 
@@ -855,8 +867,9 @@ private struct DirectoryRowView: View {
 }
 
 private struct FileIconTableView: View {
-    @Binding var presets: [FileIconPreset]
+    let presets: [FileIconConfiguration]
     let showIcons: Bool
+    let update: (FileIconConfiguration) -> Void
 
     var body: some View {
         SettingsTableFrame {
@@ -870,11 +883,12 @@ private struct FileIconTableView: View {
                 HeaderCell("显示名称（单击编辑/按住拖拽）", alignment: .leading)
             }
         } rows: {
-            ForEach(presets.indices, id: \.self) { index in
+            ForEach(Array(presets.enumerated()), id: \.element.id) { index, preset in
                 FileIconPresetRowView(
-                    preset: $presets[index],
+                    preset: preset,
                     showIcon: showIcons,
-                    isOdd: index % 2 == 1
+                    isOdd: index % 2 == 1,
+                    update: update
                 )
             }
         }
@@ -882,13 +896,20 @@ private struct FileIconTableView: View {
 }
 
 private struct FileIconPresetRowView: View {
-    @Binding var preset: FileIconPreset
+    let preset: FileIconConfiguration
     let showIcon: Bool
     let isOdd: Bool
+    let update: (FileIconConfiguration) -> Void
 
     var body: some View {
         HStack(spacing: 0) {
-            Toggle("", isOn: $preset.enabled)
+            Toggle(
+                "",
+                isOn: Binding(
+                    get: { preset.isEnabled },
+                    set: { update(\.isEnabled, value: $0) }
+                )
+            )
                 .toggleStyle(.checkbox)
                 .labelsHidden()
                 .frame(width: 58)
@@ -896,18 +917,24 @@ private struct FileIconPresetRowView: View {
             ZStack {
                 if showIcon {
                     SmallIconView(
-                        systemImage: preset.systemImage,
+                        systemImage: preset.systemImageName,
                         tint: preset.iconTint
                     )
                 }
             }
             .frame(width: 82)
 
-            Text(preset.size)
+            Text(preset.sizeDescription)
                 .font(.system(size: 13))
                 .frame(width: 128, alignment: .center)
 
-            TextField("", text: $preset.name)
+            TextField(
+                "",
+                text: Binding(
+                    get: { preset.title },
+                    set: { update(\.title, value: $0) }
+                )
+            )
                 .textFieldStyle(.plain)
                 .font(.system(size: 13))
                 .padding(.horizontal, 8)
@@ -915,6 +942,12 @@ private struct FileIconPresetRowView: View {
         }
         .frame(height: 32)
         .background(isOdd ? Color.black.opacity(0.035) : Color.white)
+    }
+
+    private func update<Value>(_ keyPath: WritableKeyPath<FileIconConfiguration, Value>, value: Value) {
+        var updated = preset
+        updated[keyPath: keyPath] = value
+        update(updated)
     }
 }
 
@@ -1300,6 +1333,37 @@ private extension FileDestinationConfiguration {
     }
 }
 
+private extension FileIconConfiguration {
+    var iconTint: Color {
+        switch iconColorName {
+        case "black":
+            return .black
+        case "blue":
+            return .blue
+        case "brown":
+            return .brown
+        case "cyan":
+            return .cyan
+        case "green":
+            return .green
+        case "indigo":
+            return .indigo
+        case "orange":
+            return .orange
+        case "pink":
+            return .pink
+        case "purple":
+            return .purple
+        case "red":
+            return .red
+        case "yellow":
+            return .yellow
+        default:
+            return .blue
+        }
+    }
+}
+
 private struct FileDestination: Identifiable {
     let id = UUID()
     var path: String
@@ -1326,41 +1390,6 @@ private struct FileDestination: Identifiable {
         .init(path: "~/Music", name: "音乐", systemImage: "folder.fill", iconTint: .cyan),
         .init(path: "~/Pictures", name: "图片", systemImage: "folder.fill", iconTint: .cyan),
         .init(path: "~/Movies", name: "影片", systemImage: "folder.fill", iconTint: .cyan)
-    ]
-}
-
-private struct FileIconPreset: Identifiable {
-    let id = UUID()
-    var enabled: Bool
-    var name: String
-    var size: String
-    let systemImage: String
-    let iconTint: Color
-
-    static let empty = FileIconPreset(
-        enabled: true,
-        name: "自定义",
-        size: "128 x 128",
-        systemImage: "photo.fill",
-        iconTint: .blue
-    )
-
-    static let defaultPresets: [FileIconPreset] = [
-        .init(enabled: true, name: "App", size: "128 x 128", systemImage: "app.fill", iconTint: .blue),
-        .init(enabled: true, name: "Apple", size: "128 x 128", systemImage: "apple.logo", iconTint: .black),
-        .init(enabled: true, name: "书本", size: "128 x 128", systemImage: "book.closed.fill", iconTint: .orange),
-        .init(enabled: true, name: "日历", size: "128 x 128", systemImage: "calendar", iconTint: .red),
-        .init(enabled: true, name: "云端", size: "128 x 128", systemImage: "cloud.fill", iconTint: .blue),
-        .init(enabled: true, name: "Excel", size: "128 x 128", systemImage: "x.square.fill", iconTint: .green),
-        .init(enabled: true, name: "文件", size: "128 x 128", systemImage: "doc.fill", iconTint: .blue),
-        .init(enabled: true, name: "谷歌", size: "128 x 128", systemImage: "globe", iconTint: .blue),
-        .init(enabled: true, name: "Mac OS1", size: "128 x 128", systemImage: "desktopcomputer", iconTint: .indigo),
-        .init(enabled: true, name: "Mac OS2", size: "128 x 128", systemImage: "macwindow", iconTint: .indigo),
-        .init(enabled: true, name: "Mac", size: "64 x 64", systemImage: "laptopcomputer", iconTint: .brown),
-        .init(enabled: true, name: "邮件", size: "128 x 128", systemImage: "envelope.fill", iconTint: .blue),
-        .init(enabled: true, name: "音乐", size: "128 x 128", systemImage: "music.note", iconTint: .pink),
-        .init(enabled: true, name: "Pages", size: "128 x 128", systemImage: "pencil.and.outline", iconTint: .orange),
-        .init(enabled: true, name: "图片", size: "128 x 128", systemImage: "photo.fill", iconTint: .cyan)
     ]
 }
 

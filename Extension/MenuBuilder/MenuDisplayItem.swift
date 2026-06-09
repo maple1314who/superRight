@@ -1,5 +1,9 @@
 import Shared
 
+/// Finder 菜单最终展示项。
+///
+/// 该模型是 `MenuBuilder` 输出给 Finder Extension 的轻量 DTO，只包含展示、
+/// 排序和动作执行所需字段，避免扩展进程直接依赖完整配置模型。
 public struct MenuDisplayItem: Equatable, Identifiable, Sendable {
     public var id: String
     public var title: String
@@ -11,6 +15,8 @@ public struct MenuDisplayItem: Equatable, Identifiable, Sendable {
     public var defaultFileName: String?
     public var templateContent: String?
     public var destinationPath: String?
+    public var iconSystemImageName: String?
+    public var iconColorName: String?
 
     public init(
         id: String,
@@ -22,7 +28,9 @@ public struct MenuDisplayItem: Equatable, Identifiable, Sendable {
         fileExtension: String?,
         defaultFileName: String?,
         templateContent: String?,
-        destinationPath: String? = nil
+        destinationPath: String? = nil,
+        iconSystemImageName: String? = nil,
+        iconColorName: String? = nil
     ) {
         self.id = id
         self.title = title
@@ -34,6 +42,8 @@ public struct MenuDisplayItem: Equatable, Identifiable, Sendable {
         self.defaultFileName = defaultFileName
         self.templateContent = templateContent
         self.destinationPath = destinationPath
+        self.iconSystemImageName = iconSystemImageName
+        self.iconColorName = iconColorName
     }
 
     public init(configuration: MenuItemConfiguration) {
@@ -47,5 +57,7 @@ public struct MenuDisplayItem: Equatable, Identifiable, Sendable {
         self.defaultFileName = configuration.defaultFileName
         self.templateContent = configuration.templateContent
         self.destinationPath = configuration.destinationPath
+        self.iconSystemImageName = configuration.iconSystemImageName
+        self.iconColorName = configuration.iconColorName
     }
 }

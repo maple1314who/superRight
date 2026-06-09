@@ -93,6 +93,9 @@ public final class ActionDispatcher {
             let directoryURL = try openDirectory(item: item)
             NSLog("ActionDispatcher.execute openDirectory destination=%@", directoryURL.path)
             return directoryURL
+        case .applyFileIcon, .removeCustomIcon:
+            NSLog("ActionDispatcher.execute file icon action forwarded-only type=%@", item.actionType.rawValue)
+            return nil
         }
     }
 

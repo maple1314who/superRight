@@ -15,10 +15,12 @@ public enum AppExecutionAction: String, Codable, Equatable, Sendable {
     case copyToDirectory
     case moveToDirectory
     case openDirectory
+    case applyFileIcon
+    case removeCustomIcon
 
     public var externalApplication: ExternalApplication? {
         switch self {
-        case .createFolder, .createFile, .copyToDirectory, .moveToDirectory, .openDirectory:
+        case .createFolder, .createFile, .copyToDirectory, .moveToDirectory, .openDirectory, .applyFileIcon, .removeCustomIcon:
             return nil
         case .openTerminal:
             return .terminal
@@ -49,6 +51,8 @@ public struct AppExecutionRequest: Codable, Sendable {
     public var applicationPath: String?
     public var sourcePaths: [String]
     public var destinationPath: String?
+    public var iconSystemImageName: String?
+    public var iconColorName: String?
     public var openAfterCreate: Bool
     public var playSoundAfterCreate: Bool
 
@@ -63,6 +67,8 @@ public struct AppExecutionRequest: Codable, Sendable {
         case applicationPath
         case sourcePaths
         case destinationPath
+        case iconSystemImageName
+        case iconColorName
         case openAfterCreate
         case playSoundAfterCreate
     }
@@ -78,6 +84,8 @@ public struct AppExecutionRequest: Codable, Sendable {
         applicationPath: String? = nil,
         sourcePaths: [String] = [],
         destinationPath: String? = nil,
+        iconSystemImageName: String? = nil,
+        iconColorName: String? = nil,
         openAfterCreate: Bool = false,
         playSoundAfterCreate: Bool = false
     ) {
@@ -91,6 +99,8 @@ public struct AppExecutionRequest: Codable, Sendable {
         self.applicationPath = applicationPath
         self.sourcePaths = sourcePaths
         self.destinationPath = destinationPath
+        self.iconSystemImageName = iconSystemImageName
+        self.iconColorName = iconColorName
         self.openAfterCreate = openAfterCreate
         self.playSoundAfterCreate = playSoundAfterCreate
     }
@@ -107,6 +117,8 @@ public struct AppExecutionRequest: Codable, Sendable {
         self.applicationPath = try container.decodeIfPresent(String.self, forKey: .applicationPath)
         self.sourcePaths = try container.decodeIfPresent([String].self, forKey: .sourcePaths) ?? []
         self.destinationPath = try container.decodeIfPresent(String.self, forKey: .destinationPath)
+        self.iconSystemImageName = try container.decodeIfPresent(String.self, forKey: .iconSystemImageName)
+        self.iconColorName = try container.decodeIfPresent(String.self, forKey: .iconColorName)
         self.openAfterCreate = try container.decodeIfPresent(Bool.self, forKey: .openAfterCreate) ?? false
         self.playSoundAfterCreate = try container.decodeIfPresent(Bool.self, forKey: .playSoundAfterCreate) ?? false
     }

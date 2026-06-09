@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## V3.4.0 - 2026-06-09
+
+### 新增
+- “文件/文件夹图标”接入真实共享配置，配置界面可编辑、启用、新增、删除和恢复默认图标预设。
+- Finder 右键菜单在选中文件或文件夹时生成“设置图标：...”和“还原默认图标”。
+- 主 App 支持执行 `applyFileIcon` 和 `removeCustomIcon`，可写入或清除 Finder 自定义图标。
+
+### 改进
+- 图标动作通过 Finder Extension 转发到主 App 执行，携带选中路径、SF Symbol 和颜色参数。
+- 共享配置兼容旧 JSON，历史用户配置会自动补图标预设和相关开关。
+- 主 App 与 Finder Extension 版本升级为 `3.4.0 / 2026060904`。
+
+### 验证
+- `swift test`：34 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：`BUILD SUCCEEDED`。
+
 ## V3.3.0 - 2026-06-09
 
 ### 改进

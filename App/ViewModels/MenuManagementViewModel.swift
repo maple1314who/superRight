@@ -37,6 +37,10 @@ public final class MenuManagementViewModel: ObservableObject {
         configuration.sortedFavoriteDirectories()
     }
 
+    public var sortedFileIconPresets: [FileIconConfiguration] {
+        configuration.sortedFileIconPresets()
+    }
+
     public func menuItems(in group: MenuGroup) -> [MenuItemConfiguration] {
         sortedMenuItems.filter { $0.group == group }
     }
@@ -165,6 +169,16 @@ public final class MenuManagementViewModel: ObservableObject {
         persistIfPossible()
     }
 
+    public func updateShowFileIconPresetIcons(_ enabled: Bool) {
+        configuration.appSettings.showFileIconPresetIcons = enabled
+        persistIfPossible()
+    }
+
+    public func updateEnableFileIconPresets(_ enabled: Bool) {
+        configuration.appSettings.enableFileIconPresets = enabled
+        persistIfPossible()
+    }
+
     public func updateNewFileTemplate(_ template: NewFileTemplateConfiguration) {
         guard let index = configuration.newFileTemplates.firstIndex(where: { $0.id == template.id }) else {
             return
@@ -288,6 +302,49 @@ public final class MenuManagementViewModel: ObservableObject {
 
     public func resetFavoriteDirectories() {
         configuration.favoriteDirectories = FileDestinationConfiguration.defaultFavoriteDirectories
+        persistIfPossible()
+    }
+
+    public func updateFileIconPreset(_ preset: FileIconConfiguration) {
+        guard let index = configuration.fileIconPresets.firstIndex(where: { $0.id == preset.id }) else {
+            return
+        }
+        configuration.fileIconPresets[index] = preset
+        configuration.normalizeOrder()
+        persistIfPossible()
+    }
+
+    public func addFileIconPreset() {
+        let nextIndex = (configuration.fileIconPresets.map(\.order).max() ?? -1) + 1
+        let preset = FileIconConfiguration(
+            id: "custom_\(UUID().uuidString)",
+            isEnabled: true,
+            title: "自定义",
+            order: nextIndex,
+            systemImageName: "photo.fill",
+            iconColorName: "blue",
+            sizeDescription: "128 x 128"
+        )
+        configuration.fileIconPresets.append(preset)
+        configuration.normalizeOrder()
+        persistIfPossible()
+    }
+
+    public func removeLastFileIconPreset() {
+        guard !configuration.fileIconPresets.isEmpty else {
+            return
+        }
+        configuration.fileIconPresets.sort { $0.order < $1.order }
+        configuration.fileIconPresets.removeLast()
+        if configuration.fileIconPresets.isEmpty {
+            configuration.fileIconPresets = FileIconConfiguration.defaultPresets
+        }
+        configuration.normalizeOrder()
+        persistIfPossible()
+    }
+
+    public func resetFileIconPresets() {
+        configuration.fileIconPresets = FileIconConfiguration.defaultPresets
         persistIfPossible()
     }
 

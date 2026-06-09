@@ -359,6 +359,27 @@ final class MenuBuilderTests: XCTestCase {
         XCTAssertFalse(menu.contains { $0.id == "toolbox_disabled" })
     }
 
+    func testAirDropToolboxItemIsAvailableForFileSelection() throws {
+        let builder = MenuBuilder(
+            availabilityChecker: MockAvailabilityChecker(unavailableApps: [])
+        )
+        let tempDirectory = try TemporaryDirectory()
+        defer { tempDirectory.remove() }
+        let fileURL = tempDirectory.url.appendingPathComponent("sample.txt")
+        try "hello".data(using: .utf8)?.write(to: fileURL)
+
+        let context = FinderSelectionContext(
+            selectedItemURLs: [fileURL],
+            currentDirectoryURL: tempDirectory.url
+        )
+
+        let menu = builder.buildMenu(context: context, configuration: .default)
+        let item = try XCTUnwrap(menu.first { $0.actionType == .sendViaAirDrop })
+
+        XCTAssertEqual(item.id, "toolbox_send_via_airdrop")
+        XCTAssertEqual(item.title, "隔空投送")
+    }
+
     func testToolboxDirectoryItemsAreAvailableForBlankSpace() throws {
         let builder = MenuBuilder(
             availabilityChecker: MockAvailabilityChecker(unavailableApps: [])
@@ -377,6 +398,7 @@ final class MenuBuilderTests: XCTestCase {
         XCTAssertTrue(actionTypes.contains(.hideDirectoryItems))
         XCTAssertTrue(actionTypes.contains(.unhideDirectoryItems))
         XCTAssertFalse(actionTypes.contains(.copyFileName))
+        XCTAssertFalse(actionTypes.contains(.sendViaAirDrop))
     }
 
     func testToolboxCanBeDisabled() throws {

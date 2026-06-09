@@ -96,7 +96,7 @@ public final class ActionDispatcher {
         case .applyFileIcon, .removeCustomIcon:
             NSLog("ActionDispatcher.execute file icon action forwarded-only type=%@", item.actionType.rawValue)
             return nil
-        case .showFileInfo, .copyFileName, .createFolderFromFileName,
+        case .showFileInfo, .copyFileName, .createFolderFromFileName, .sendViaAirDrop,
              .hideSelectedItems, .unhideSelectedItems, .hideDirectoryItems, .unhideDirectoryItems:
             NSLog("ActionDispatcher.execute toolbox action forwarded-only type=%@", item.actionType.rawValue)
             return nil

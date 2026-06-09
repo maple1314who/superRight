@@ -64,10 +64,19 @@ public struct ToolboxItemConfiguration: Codable, Equatable, Identifiable, Sendab
             iconColorName: "cyan"
         ),
         .init(
+            id: "send_via_airdrop",
+            isEnabled: true,
+            title: "隔空投送",
+            order: 3,
+            actionType: .sendViaAirDrop,
+            systemImageName: "paperplane.fill",
+            iconColorName: "blue"
+        ),
+        .init(
             id: "hide_selected_items",
             isEnabled: true,
             title: "隐藏已选文件",
-            order: 3,
+            order: 4,
             actionType: .hideSelectedItems,
             systemImageName: "eye.slash.fill",
             iconColorName: "gray"
@@ -76,7 +85,7 @@ public struct ToolboxItemConfiguration: Codable, Equatable, Identifiable, Sendab
             id: "unhide_selected_items",
             isEnabled: true,
             title: "取消隐藏已选文件",
-            order: 4,
+            order: 5,
             actionType: .unhideSelectedItems,
             systemImageName: "eye.fill",
             iconColorName: "gray"
@@ -85,7 +94,7 @@ public struct ToolboxItemConfiguration: Codable, Equatable, Identifiable, Sendab
             id: "hide_directory_items",
             isEnabled: true,
             title: "隐藏全部文件",
-            order: 5,
+            order: 6,
             actionType: .hideDirectoryItems,
             systemImageName: "eye.slash.fill",
             iconColorName: "gray"
@@ -94,7 +103,7 @@ public struct ToolboxItemConfiguration: Codable, Equatable, Identifiable, Sendab
             id: "unhide_directory_items",
             isEnabled: true,
             title: "取消隐藏全部文件",
-            order: 6,
+            order: 7,
             actionType: .unhideDirectoryItems,
             systemImageName: "eye.fill",
             iconColorName: "gray"

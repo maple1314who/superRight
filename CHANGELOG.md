@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## V3.7.0 - 2026-06-09
+
+### 新增
+- 工具箱新增“隔空投送”默认项，选中文件或文件夹时在 Finder 右键菜单展示。
+- Finder Extension 将隔空投送动作转发给主 App，并携带选中路径。
+- 主 App 通过系统 `NSSharingService` 调起 AirDrop 分享面板发送选中项。
+
+### 改进
+- 旧配置会通过默认项迁移自动补齐 `send_via_airdrop`，不覆盖用户已有工具箱配置。
+- ExtensionCore 对隔空投送保持转发语义，不在 Finder Extension 进程直接弹系统分享面板。
+- 主 App 与 Finder Extension 版本升级为 `3.7.0 / 2026060907`。
+
+### 验证
+- `swift test`：41 tests, 0 failures。
+- `xcodebuild -project 右键增强.xcodeproj -scheme 右键增强 -configuration Debug -destination platform=macOS build`：`BUILD SUCCEEDED`。
+
 ## V3.6.0 - 2026-06-09
 
 ### 新增

@@ -145,6 +145,14 @@ final class UserDefaultsConfigurationStoreTests: XCTestCase {
             return
         }
 
+        if var toolboxItems = rootObject["toolboxItems"] as? [[String: Any]] {
+            toolboxItems.removeAll { ($0["id"] as? String) == "send_via_airdrop" }
+            rootObject["toolboxItems"] = toolboxItems
+        } else {
+            XCTFail("无法构造 legacy toolboxItems")
+            return
+        }
+
         let legacyData = try JSONSerialization.data(withJSONObject: rootObject)
         defaults.set(legacyData, forKey: SharedConstants.configurationStorageKey)
 
@@ -155,6 +163,7 @@ final class UserDefaultsConfigurationStoreTests: XCTestCase {
             loaded.applicationPaths[.idea],
             ExternalApplication.idea.defaultBundlePath
         )
+        XCTAssertNotNil(loaded.toolboxItems.first { $0.id == "send_via_airdrop" })
 
         defaults.removePersistentDomain(forName: suiteName)
     }

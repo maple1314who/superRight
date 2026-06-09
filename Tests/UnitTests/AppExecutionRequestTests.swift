@@ -11,6 +11,7 @@ final class AppExecutionRequestTests: XCTestCase {
         XCTAssertNil(AppExecutionAction.showFileInfo.externalApplication)
         XCTAssertNil(AppExecutionAction.copyFileName.externalApplication)
         XCTAssertNil(AppExecutionAction.createFolderFromFileName.externalApplication)
+        XCTAssertNil(AppExecutionAction.sendViaAirDrop.externalApplication)
         XCTAssertNil(AppExecutionAction.hideSelectedItems.externalApplication)
         XCTAssertNil(AppExecutionAction.unhideSelectedItems.externalApplication)
         XCTAssertNil(AppExecutionAction.hideDirectoryItems.externalApplication)
